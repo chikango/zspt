@@ -1,0 +1,703 @@
+// Custom scripts
+$(document).ready(function () {
+
+    // MetsiMenu
+    $('#side-menu').metisMenu();
+
+    // Collapse ibox function
+    $('.collapse-link').click( function() {
+        var ibox = $(this).closest('div.ibox');
+        var button = $(this).find('i');
+        var content = ibox.find('div.ibox-content');
+        content.slideToggle(200);
+        button.toggleClass('fa-chevron-up').toggleClass('fa-chevron-down');
+        ibox.toggleClass('').toggleClass('border-bottom');
+        setTimeout(function () {
+            ibox.resize();
+            ibox.find('[id^=map-]').resize();
+        }, 50);
+    });
+
+    // Close ibox function
+    $('.close-link').click( function() {
+        var content = $(this).closest('div.ibox');
+        content.remove();
+    });
+
+    // Small todo handler
+    $('.check-link').click( function(){
+        var button = $(this).find('i');
+        var label = $(this).next('span');
+        button.toggleClass('fa-check-square').toggleClass('fa-square-o');
+        label.toggleClass('todo-completed');
+        return false;
+    });
+
+    // Append config box / Only for demo purpose
+//    $.get("skin-config.html", function (data) {
+//        $('body').append(data);
+//    });
+
+    // minimalize menu
+    $('.navbar-minimalize').click(function () {
+        $("body").toggleClass("mini-navbar");
+        if ($('body').hasClass('mini-navbar')) {
+			$('.navbar-static-side').removeAttr('style');
+			$('.sidebar-collapse').css('margin-right','0').css('overflow-y','visible')
+        } else {
+			$('.navbar-static-side').css('display','block').css('width','220px').css('height','100%');
+			$('.sidebar-collapse').css('margin-right','-24px').css('overflow-y','scroll')
+        }
+        SmoothlyMenu();
+    })
+
+    // tooltips
+    $('.tooltip-demo').tooltip({
+        selector: "[data-toggle=tooltip]",
+        container: "body"
+    })
+
+    // Move modal to body
+    // Fix Bootstrap backdrop issu with animation.css
+    $('.modal').appendTo("body")
+
+    // Full height of sidebar
+    function fix_height() {
+        var heightWithoutNavbar = $("body > #wrapper").height() - 61;
+        $(".sidebard-panel").css("min-height", heightWithoutNavbar + "px");
+    }
+    fix_height();
+
+    // Fixed Sidebar
+    // unComment this only whe you have a fixed-sidebar
+            //    $(window).bind("load", function() {
+            //        if($("body").hasClass('fixed-sidebar')) {
+            //            $('.sidebar-collapse').slimScroll({
+            //                height: '100%',
+            //                railOpacity: 0.9,
+            //            });
+            //        }
+            //    })
+
+    $(window).bind("load resize click scroll", function() {
+        if(!$("body").hasClass('body-small')) {
+            fix_height();
+        }
+    });
+
+    $("[data-toggle=popover]").popover();
+    
+    /* 图片hover底下小按钮 */
+    $('body').on('mouseover','.attachment-box',function(){
+    	$(this).find('.bom-btns').removeClass("hide");
+    });
+    $('body').on('mouseleave','.attachment-box',function(){
+    	var bomBtms = $(this).find('.bom-btns');
+    	setTimeout(function(){
+    		bomBtms.addClass("hide")
+    	},2000)
+    });
+    
+    
+    /*搜索区小按钮控制*/
+    var showSearchVal = localStorage.getItem('showSearchVal');
+    $('body').on('click','.toggleShowBtn',function(){
+    	console.log('ok')
+    	showSearchVal = localStorage.getItem('showSearchVal')
+    	if(showSearchVal==="0"){
+    		localStorage.setItem('showSearchVal', '1')
+    		$(this).removeClass('fa-toggle-off').addClass('fa-toggle-on')
+    	}
+    	else if(showSearchVal==="1"){
+    		localStorage.setItem('showSearchVal', '0')
+    		$(this).removeClass('fa-toggle-on').addClass('fa-toggle-off')
+    	}
+    })
+    
+    
+    /*点击左边菜单鼠标直接滚到顶部*/
+    $('body').on('click','.nav-second-level li a',function(){
+		$('#page-wrapper').scrollTop(0)
+	})
+	
+
+    //表格字体超出则弹出泡泡
+	$('body').on('mouseover','table.ellipsis .val',function(){
+		var text = $(this).text();
+		$(this).tooltip({
+			'title':text
+		})
+	})
+});
+/*搜索框展开收起*/
+
+/*本地存储是否始终显示搜索区： 0否， 1是(默认)*/
+function controlSearchBtn(){
+	var showSearchVal = localStorage.getItem('showSearchVal');
+	if(showSearchVal==undefined){
+		localStorage.setItem('showSearchVal','1');
+	}
+    var searchToggleBtn ="<span id='searchCollapseBtn' data-toggle='collapse' data-target='.searchContainer' class='btn btn-white btn-sm' style='margin-left:8px;'> " 
+    	+	"搜索<a><i title='保持显示/隐藏' class='toggleShowBtn fa "+ (showSearchVal==0?'fa-toggle-off':'fa-toggle-on')  +" fa-rotate-90'></i></a></span>" 
+    $('form[id^="search"],#formreport').addClass('collapse '+ (showSearchVal==0?"":"in")  +' searchContainer mt10')
+    $('form[id^="search"]').closest('.ibox-content').css('padding-top','0')
+    
+    
+    if($('.tab-content').find('.tab-pane').length>0){
+	    $('.tab-pane').each(function(){
+	    	if($(this).find('.toggleShowBtn').html()==undefined){
+	        	if($(this).find('.reload').html()!=undefined){
+	        		$(this).find('.reload').after(searchToggleBtn)
+	        	}
+	        	else{
+	        		$(this).find('form[id^="search"]').closest('.ibox-content').before('<p style=\'margin:10px 20px 10px;float:right;\'>'+ searchToggleBtn + '</p>')	
+	        	}  		
+	    	}
+	    })
+    }
+    else{
+    	if($('.ibox-title').find('.toggleShowBtn').html()==undefined){
+        	if($('.ibox-title').find('.reload').html()!=undefined){
+        		$('.ibox-title').find('.reload').after(searchToggleBtn)
+        	}
+        	else{
+        		$('.ibox-title').find('form[id^="search"],#formreport').closest('.ibox-content').before('<p style=\'margin:10px 20px 10px;float:right;\'>'+ searchToggleBtn + '</p>')	
+        	}  		
+    	}
+    }
+} 
+
+/*搜索框回车键*/
+function searchKeyPress(){
+   	$("body").on("focus","input[name^='search'],input[name^='info']",function(){
+    		if($(this).val()!=undefined){
+    		var id = ""
+    		if($(".nav-tabs li").length>0){
+	    		$(".nav-tabs li").each(function(){
+	    			if($(this).hasClass("active")){
+	    				id=$(this).find('a').attr('href')
+	    			}
+	    		})
+    		}
+	        window.onkeydown = function (){           
+	            if (event.keyCode == 13) {
+	            	if($('.tab-pane').length>0&&$('.nav-tabs li').length>0){
+            			$(id).find('form[id^="search"]').find('.fa-search').closest('button').click();
+	            	}
+	            	else{
+            			$('form[id^="search"],#formreport').find('.fa-search').closest('button').click();
+	            	}
+	            	}  
+	        	}
+    			}
+    		})
+    	}
+
+
+
+// For demo purpose - animation css script
+function animationHover(element, animation){
+    element = $(element);
+    element.hover(
+        function() {
+            element.addClass('animated ' + animation);
+        },
+        function(){
+            //wait for animation to finish before removing classes
+            window.setTimeout( function(){
+                element.removeClass('animated ' + animation);
+            }, 2000);
+        });
+}
+
+// Minimalize menu when screen is less than 768px
+$(function() {
+    $(window).bind("load resize", function() {
+        if ($(this).width() < 769) {
+            $('body').addClass('body-small');
+            $('body').addClass('mini-navbar');
+            $('.navbar-static-side').removeAttr('style');
+        } else {
+            $('body').removeClass('body-small');
+        }
+    });
+    
+    $(document).on("click", ".fullscreen", function() {
+    	var par = $(this).parents(".wrapper-content");
+    	par.toggleClass('portlet-fullscreen');
+    	if (par.hasClass("portlet-fullscreen"))
+    		$(this).find("i").removeClass('fa-expand').addClass('fa-compress');
+    	else {
+    		$(this).find("i").addClass('fa-expand').removeClass('fa-compress');
+    	}
+    });
+
+    $(document).on("click", ".reload", function() {
+    	var pReload = $(this).closest('.ibox-title').parent().find('.pReload');
+    	if (pReload.length > 0)
+    		pReload.click();
+    });
+    
+    $(".btn-close").click(function() {
+		gener.dialogClose();
+	});
+})
+
+function SmoothlyMenu() {
+    if (!$('body').hasClass('mini-navbar') || $('body').hasClass('body-small')) {
+        // Hide menu in order to smoothly turn on when maximize menu
+        $('#side-menu').hide();
+        // For smoothly turn on menu
+        setTimeout(
+            function () {
+                $('#side-menu').fadeIn(500);
+			}, 100);
+    } else if ($('body').hasClass('fixed-sidebar')){
+        $('#side-menu').hide();
+        setTimeout(
+            function () {
+                $('#side-menu').fadeIn(500);
+			}, 300);
+    } else {
+        // Remove all inline style from jquery fadeIn function to reset menu state
+		$('#side-menu').removeAttr('style');
+    }
+}
+
+// Dragable panels
+function WinMove() {
+    var element = "[class*=col]";
+    var handle = ".ibox-title";
+    var connect = "[class*=col]";
+    $(element).sortable(
+        {
+            handle: handle,
+            connectWith: connect,
+            tolerance: 'pointer',
+            forcePlaceholderSize: true,
+            opacity: 0.8,
+        })
+        .disableSelection();
+};
+
+
+$.reloadFlexgrid = function(flexgrid, exparams, pindex) {
+	var params = {
+		extParam: exparams
+	};
+	if (flexgrid[0] != undefined) {
+		if (pindex == 'undefined' || pindex == undefined)
+			flexgrid[0].p.newp = 1;
+		flexgrid.flexOptions(params).flexReload();
+	}
+};	
+
+$.searchFlexgrid = function(flexgrid, pindex) {
+	var contactQuery = {};
+	var ibox = flexgrid.closest(".ibox").length == 1? flexgrid.closest(".ibox") : flexgrid.closest(".ibox-content");
+	var searchForm = ibox.find(".search-form");
+	if (searchForm.length == 0) { // 兼容以前的写法
+		searchForm = ibox.find("form[id|=search-form]");
+	}
+	if (searchForm.length == 0) { // 兼容以前的写法
+		searchForm = $("#search-form-" + flexgrid.attr("id"));
+	}
+	if (searchForm.length == 1) {
+		searchForm.find("input,select").each(function() {
+			if ($(this).attr("name") != undefined && $.trim($(this).val()) != "")
+				contactQuery[$(this).attr("name")] = $.trim($(this).val());
+		});
+	}
+	var params = {
+		extParam: contactQuery
+	};
+	if (flexgrid[0] != undefined) {
+		if (pindex == 'undefined' || pindex == undefined)
+			flexgrid[0].p.newp = 1;
+		flexgrid.flexOptions(params).flexReload();
+	}
+};
+
+$.checkAuth = function(authId, roleAuths) {
+	if (typeof(authId) == 'undefined' || $.trim(authId) == "")
+		return false;
+
+	if (typeof(roleAuths) == 'undefined' || $.trim(roleAuths) == "")
+		return true;
+	
+	if ((","+roleAuths+",").indexOf(","+authId+",") > -1)
+		return true;
+	
+	return false;
+};
+
+//记住滚动条位置
+function getScrollTop(){
+	var scrollTop = $("#page-wrapper").scrollTop()
+	localStorage.setItem('SCROLL_TOP',scrollTop)
+}
+
+//读取滚动条位置
+function setScrollTop(){
+	var scrollTop = localStorage.getItem('SCROLL_TOP',scrollTop)||0
+	$("#page-wrapper").scrollTop(scrollTop)
+}
+
+// 异步加载页面
+function ajaxHtml(obj, url) {
+	var curwrapobj = $(obj).closest(".wrap-ajaxhtml");
+	$.ajax({
+		type: "GET",
+		cache: false,
+		url: url,
+		dataType: "html",
+		beforeSend: function() {
+			getScrollTop()
+			layer.load(1, { // 风格为1的加载图标
+				shade: [0.1,'#fff'], // 遮罩层：0.1透明度的白色背景
+			});
+		},
+		success: function(data) {
+			curwrapobj.before(data);
+			curwrapobj.hide();
+			//修复图片的插件
+			// fixViewerPlugin()
+			fixContractViewer()
+			$('#page-wrapper').scrollTop(0)
+		},
+		complete: function() {
+			layer.closeAll();
+		}
+	});
+}
+
+function ajaxHtmlContent(obj, url) {
+	var curwrapobj = $(".wrapcontent-ajaxhtml");
+	$.ajax({
+		type: "GET",
+		cache: false,
+		url: url,
+		dataType: "html",
+		beforeSend: function() {
+			layer.load(1, { // 风格为1的加载图标
+				shade: [0.1,'#fff'], // 遮罩层：0.1透明度的白色背景
+			});
+		},
+		success: function(data) {
+			$(curwrapobj).html(data);
+		},
+		complete: function() {
+			layer.closeAll();
+		}
+	});
+}
+
+//点击树切换页面
+function ajaxHtmlBom(obj, url) {
+	
+	var curwrapobj = $("."+obj);
+	$.ajax({
+		type: "GET",
+		cache: false,
+		url: url,
+		dataType: "html",
+		beforeSend: function() {
+			layer.load(1, { // 风格为1的加载图标
+				shade: [0.1,'#fff'], // 遮罩层：0.1透明度的白色背景
+			});
+		},
+		success: function(data) {
+			$(curwrapobj).html(data);
+		},
+		complete: function() {
+			layer.closeAll();
+		}
+	});
+}
+
+
+
+
+// 异步加载页面回退
+function ajaxHtmlGoBack(obj) {
+	var curwrapobj = $(obj).closest(".wrap-ajaxhtml");
+	curwrapobj.next().show();
+	curwrapobj.remove();
+	setScrollTop()
+}
+
+// 通用的table行删除事件（规定序号列的name='seq'）
+function rowDel(obj, callback) {
+	var currow = $(obj).closest("tr");
+	// 维护序号
+	$.each(currow.nextAll(), function() {
+		var seqobj = $(this).find("td[name='seq']");
+		seqobj.html(Number(seqobj.html())-1);
+	});
+	// 删除行
+	currow.remove();
+	// 回调
+	if (typeof(callback) != "undefined") {
+	    callback();
+	}
+}
+
+// 通用tab初始化方法
+function initTab(Controller) {
+	// 绑定tab事件
+    $('ul.nav-tabs li a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var panel = $($(this).attr('href'));
+        if (panel.length > 0) {
+        	panel.addClass('active');
+            // 初始化tab对应的表格
+            Controller.tables[panel.attr('id')].call(this);
+            // tab切换刷新表格
+            $(this).on('click', function (e) {
+                $($(this).attr('href')).find('.reload').trigger('click');
+            });
+        }
+        // 移除绑定的事件
+        $(this).unbind('shown.bs.tab');
+    });
+    
+    // 初始化活动tab
+	var activeTab = $('ul.nav-tabs li.active');
+	if (activeTab.length != 1) {
+		activeTab = $('ul.nav-tabs li').first();
+		if (activeTab.length == 1) {
+			activeTab.addClass('active');
+		}
+	}
+	if (activeTab.length == 1) {
+		$('ul.nav-tabs li.active a[data-toggle="tab"]').trigger("shown.bs.tab");
+	}
+}
+
+var Common = {
+	    isEmpty: function (obj) {
+	        for (var name in obj) {
+	            return false;
+	        }
+	        return true;
+	    },
+	    getQueryString:function(searchurl,name) {
+	        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+	        var r = searchurl.substr(1).match(reg);
+	        if (r != null) return (r[2]);
+	        return null;
+	    },
+	    /**
+	     * 检查是否是手机号码
+	     */
+	    isMobile: function (mobile) {
+	        var mobileReg = /^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/;
+	        return mobileReg.test(mobile);
+	    },
+	    /**
+	     * 检查是否是手机号码
+	     */
+	    getLoginUser:function () {
+	        var currentusr = localStorage.getItem('user');
+	        if(currentusr!=null){
+	            currentusr=JSON.parse(currentusr);
+	        }
+	        return currentusr;
+	    },
+	    /**
+	     * 检查是否是座机
+	     */
+	    isCellPhone: function (mobile) {
+	        var mobileReg = /^(0[0-9]{2,3}-)?([2-9][0-9]{6,7})+(-[0-9]{1,4})?$/;
+	        //var cellphonereg=/^((0\d{2,3}-\d{7,8})|(1[3584]\d{9}))$/;
+	        return mobileReg.test(mobile);
+	    },
+	    /**
+	     * 检查是否是座机
+	     */
+	    isPhone: function (mobile) {
+	        let result = false;
+	        if (this.isMobile(mobile) || this.isCellPhone(mobile)) {
+	            result = true;
+	        }
+	        return result;
+	    },
+	    /**
+	     * 检查是否为邮箱
+	     */
+	    isEmail: function (email) {
+
+	        var p = /^[_\.0-9a-z-]+@([0-9a-z][0-9a-z-]+\.){1,4}[a-z]{2,3}$/i;
+	        return p.test(email);
+	    },
+	    IsIntThanZero: function (str) {
+	        var regax = /^[0-9]*[1-9][0-9]*$/;
+	        return regax.test(str);
+	    },
+	    isDefaultFloat: function (str) {
+	        if (str == '') return true;
+	        var reg = /(^\d+([.]\d{0,4})?$)/;
+	        return reg.test(str);
+	    },
+	    IsFlortOrInt: function (str) {
+	        if (str == '') return true;
+	        var reg = /^[0-9]+([.]{1}[0-9]+){0,1}$/;
+	        return reg.test(str);
+	    },
+	    IsFloat: function (str) {
+	        if (str == '') return true;
+	        var reg = /^-?([1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0)$/;
+	        return reg.test(str);
+	    },
+	    checkdate: function (str) {
+	        if (str == '') return true;
+	        var reg = /^(?:(?!0000)[0-9]{4}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-8])|(?:0[13-9]|1[0-2])-(?:29|30)|(?:0[13578]|1[02])-31)|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$/;
+	        return reg.test(str);
+	    },
+	    isFloat_length: function (str) {
+	        if (str == '') return true;
+	        var reg = /(^\d{1,8}(\.\d{1,2})?$)/;
+	        return reg.test(str);
+	    },
+	    isEnglishString: function (str) {
+	        if (str == '') return true;
+	        var reg = /[a-zA-Z]/;
+	        return reg.test(str);
+	    },
+	    isContains:function (array,item){
+	        var iscontain=false;
+	        if(array!=null&&item!=null){
+	            for(var i=0;i<array.length;i++){
+	                if(array[i]== item){
+	                    return true
+	                }
+	            }
+	        }
+
+	        return iscontain;
+	    },
+	    formatDate:function (pdata,fmt) {
+	        var o = {
+	            "M+": pdata.getMonth() + 1, //月份
+	            "d+": pdata.getDate(), //日
+	            "h+": pdata.getHours(), //小时
+	            "m+": pdata.getMinutes(), //分
+	            "s+": pdata.getSeconds(), //秒
+	            "q+": Math.floor((pdata.getMonth() + 3) / 3), //季度
+	            "S": pdata.getMilliseconds() //毫秒
+	        };
+	        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (pdata.getFullYear() + "").substr(4 - RegExp.$1.length));
+	        for (var k in o)
+	            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+	        return fmt;
+	    },
+
+	//检查是否为正整数包括0
+	    isNum: function (strNumber) {
+	        var reg = /(^\d+$)/;
+	        return reg.test(strNumber);
+	    },
+	//检查是否为正整数包括0
+	    isIntNum: function (strNumber) {
+	        var reg = /(^[-]?\d+$)/;
+	        return reg.test(strNumber);
+	    },
+	//检查是否为正整数不包括0
+	    isNumThanZero: function (strNumber) {
+	        var reg = /^[1-9][0-9]*$/;
+	        return reg.test(strNumber);
+	    },
+	    isNumOrUpper: function (strNumber) {
+	        var reg = /^[A-Z\d]+$/;
+	        return reg.test(strNumber);
+	    },
+	    isNumOrUpperLength: function (strNumber,length) {
+	 
+	    	 var reg = "/^[A-Z\\d]{" + length + "}$/;"; 
+	    	 reg=eval(reg);
+	        return reg.test(strNumber);
+	    },
+	    isNumLength: function (strNumber,length) {
+	    	 var reg = "/^\\d{" + length + "}$/;";
+	    	 reg=eval(reg);
+	        return reg.test(strNumber);
+	    },
+	    
+	//判断用户的权限
+	    checkAuths:function(auths){
+	        let isauth = false;
+	        let user = JSON.parse(localStorage.getItem('user')); //获取当前登录用户的权限列表
+	        var authlist = new Array();
+	        if(user !=null && user.rolerelationpermissionModelEx != null && user.rolerelationpermissionModelEx.length>0){
+	            authlist = user.rolerelationpermissionModelEx;
+	            for(var i = 0 ;i <authlist.length;i++){
+	                if(auths == authlist[i].permissionid){
+	                    isauth = true;
+	                    break;
+	                }
+	            }
+	        }
+	        return isauth;
+	    },
+	    getToday:function() {
+	        let today = new Date();
+	        let datestr = (today.getFullYear()) + "年" + (today.getMonth() + 1 ) + "月" + today.getDate() + "日";
+	        return datestr;
+	    },
+	    compareDispatchItem:function(objone, objtwo) {
+	        let value1=objone.itemorder!=null?objone.itemorder:0;
+	        let value2=objtwo.itemorder!=null?objtwo.itemorder:0;
+	        if (parseInt(value1) < parseInt(value2)) {
+	            return -1;
+	        } else if (parseInt(value1) > parseInt(value2)) {
+	            return 1;
+	        } else {
+	            return 0;
+	        }
+	    }
+	}
+/*通用下载*/
+function commondownload( hrefvalue){
+	 var fileservicename=$("#fileserviceurl").val();
+	 if(fileservicename==undefined||fileservicename==null){
+		 fileservicename=parent.$("#fileserviceurl").val();
+	 }
+	 return fileservicename+hrefvalue;
+}
+function dodownloadfile(result){
+	debugger;
+	return encodeURI(commondownload("FileUpDown/writeFile?path="+result.msg+"&sheetName="+result.uid));
+}
+
+//外置插件修复图片显示问题
+function fixViewerPlugin(){
+	console.log('fixViewerPlugin正常运行ing')
+		var html = "<div style='position:fixed;right:20px;top:80%;'><button onclick='fixViewer()'><i class='fa fa-medkit text-danger'></i></button></div>"
+			$('#page-wrapper').append(html)
+		
+}
+function fixViewer(){
+	$('.docs-galley').each(function(){
+		if(!$(this).closest('.bom-table').hasClass('docs-pictures')&&!$(this).hasClass('docs-pictures')){
+				$(this).addClass('docs-pictures')
+			    $(".docs-pictures").viewer("destroy").viewer({
+					url : "data-original"
+				    });
+				gener.toast('已单次修复，请联系工作人员反馈BUG')
+		}
+		else{
+			gener.toast('当前页面无需修复，如有问题请联系工作人员反馈BUG')
+		}
+	})
+}
+// 修复工商业合同的图片浏览问题
+function fixContractViewer(){
+	$('#contractformchangeother .docs-galley').each(function(index,element){
+		if(!$(this).hasClass('docs-pictures')){
+			$(this).addClass('docs-pictures')
+		}
+		$(".docs-pictures").viewer("destroy").viewer({
+			url : "data-original"
+			});
+	})
+}
+

@@ -1,0 +1,1526 @@
+var checkeds = new Array();
+var materialArr= new Array();//每一个物料[配置子料使用]
+var materialMap = new Map();//所有的materialArr集合[配置子料使用]
+var returnsmanage=function(){
+	var loaddata=function(){
+		if($("#grid").size()>0){
+			$("#grid").flexigrid({
+				url:'/ReturnsManage/search',
+				extParam :{
+					"info.isincludeint":1
+				},
+				dataType:'json',
+				colModel:[{
+					display:'returnid',
+					name:'returnid',
+					hide:true
+				},{
+					display : '序号',
+					name : 'sno',
+					width : 20,
+				},{
+					display : '退货单号',
+					name : 'returnno',
+					width : 50,
+				},{
+					display : '代理商名称',
+					name : 'showname',
+					width : 100,
+				},{
+					display : '申请人',
+					name : 'createusername',
+					width : 50,
+				},{
+					display : '申请时间',
+					name : 'createtime',
+					width : 100,
+				},{
+					display : '退货类型',
+					name : 'typename',
+					width : 50,
+				},{
+					display : '状态',
+					name : 'returnstatename',
+					width : 50,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "returnid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processData,
+			});
+		}
+	};
+	function processData(data) {
+		var curorgid = $("#curorgid").val();
+		var curorgtype = $("#curorgtype").val();
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			if(cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			cell.actions="";
+			if(cell.returnstate == 0){
+				if(curorgtype==2 && curorgid==cell.agentid){
+					if ($.checkAuth("200603", data.authIds)) {
+						cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/editReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-edit'></i> 编辑</a>";
+					}
+				}
+			}else if(cell.returnstate == 2){
+				if ($.checkAuth("200605", data.authIds)) {
+			    	cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/checkReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-edit'></i> 商务审核</a>";
+				}
+			}else if(cell.returnstate == 3){
+				if ($.checkAuth("200606", data.authIds)) {
+			    	cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/checkReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-edit'></i> 财务审核</a>";
+				}
+			}else if(cell.returnstate == 1){
+				if ($.checkAuth("200607", data.authIds)) {
+			    	cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/checkReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-edit'></i> 计划审核</a>";
+				}
+			}else if(cell.returnstate == 5){
+				if ($.checkAuth("200609", data.authIds)) {
+					cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/checksure?returnid=" + cell.returnid + "\")'><i class='fa fa-check'></i> 商务确认</a>";
+				}
+			}else if(cell.returnstate == 6){
+				if ($.checkAuth("200610", data.authIds)) {
+					cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/qualitychecking?returnid=" + cell.returnid + "\")'><i class='fa fa-check'></i> 质检</a>";
+				}
+			}else if(cell.returnstate == 7){
+				if ($.checkAuth("200611", data.authIds)) {
+					cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/selectInWarehouse?returnid=" + cell.returnid + "\")'><i class='fa fa-check'></i> 仓库拆单</a>";
+				}
+			}
+			if ($.checkAuth("200604", data.authIds)) {
+				if(cell.anbadwhid==null || cell.anbadwhid == 0){
+					cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/detailsReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-eye'></i> 详情</a>";
+				}else if(cell.anbadwhid!=null && cell.anbadwhid>0){
+					cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/ReturnsManage/newdetailsReturngoods?returnid=" + cell.returnid + "\")'><i class='fa fa-eye'></i> 详情</a>";
+				}
+    	    	
+			}
+		}
+		return data;
+	};
+	var loaddataMaterials = function() {
+		if ($("#grid_materials").size() > 0) {
+		    $("#grid_materials").flexigrid({
+			url : '/ReturnsManage/getMaterial',
+			extParam : {
+				"info.whid":$("#whid").val(),
+				"info.returntype":$("#type").val(),
+				"info.agentid":$("#agentid").val(),
+			},
+			dataType : 'json',
+			colModel : [ {
+			    display : '序号',
+			    name : 'sno',
+			    width : 20,
+			}, {
+			    display : 'id',
+			    name : 'id',
+			    hide : true,
+			}, {
+			    display : '物料编码',
+			    name : 'materialcode',
+			    width : 50,
+			}, {
+			    display : '物料名称',
+			    name : 'materialname',
+			    width : 120,
+			}, {
+			    display : '物料组',
+			    name : 'groupname',
+			    width : 30,
+			}, {
+				display : '可用自有数量',
+				name : 'availablemyamount',
+				width : 50,
+			}, {
+				display : '可用托管数量',
+			    name : 'availableagentamount',
+			    width : 50,
+			}, {
+				display : '储备数量',
+				name : 'reservestock',
+				width : 50,
+			}, {
+				display : '单价',
+				name : 'pricetrue',
+				width : 50,
+			}, {
+				display : '功率',
+				name : 'power',
+				width : 50,
+			}, {
+				display : 'ifmainmaterial',
+				name : 'ifmainmaterial',
+				hide : true,
+			}, {
+				display : 'materialgroup',
+				name : 'materialgroup',
+				hide : true,
+			}, {
+			    display : '操作',
+			    name : 'actions',
+			    width : 50,
+			} ],
+			minColToggle : 1,
+			onrowclick : false,
+			sortname : "id",
+			sortcollection : "asc",
+			usepager : true,
+			useRp : true,
+			rp : 10,
+			resizable : false,
+			width : 'auto',
+			height : 'auto',
+			autoload : true,
+			singleSelect : true,
+			specify : true,
+			striped : true,
+			showcheckbox : false,
+			showToggleBtn : true,
+			mutliSelect : false,
+			preProcess : processData_Material,
+		    });
+		}
+	};
+	function processData_Material(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+		    var cell = data.rows[i].cell;
+		    cell.sno = i + 1;
+		    var ischecked = "";
+		    for (var j = 0; j < checkeds.length; j++) {
+				if (checkeds[j].materialcode == cell.materialcode) {
+					ischecked = "checked";
+					break; // 终止循环
+				}
+		    }
+		    cell.actions = "<input type='checkbox' onclick='returnsmanage.checkOne(this);' " + ischecked + "/>";
+		}
+		return data;
+    };
+	var search = function(pageIndex) {
+		if (document.getElementById("isincludech").checked) {
+			$("#isinclude").val(1);
+		} else {
+			$("#isinclude").val(0);
+		}
+		$.searchFlexgrid($('#grid'), pageIndex);
+	};
+	var searchmaterials = function(pageIndex) {
+		$.searchFlexgrid($('#grid_materials'), pageIndex);
+	};
+	return {
+		// 初始化表格数据
+		init : function() {
+			loaddata();
+		},
+		initMaterials : function() {
+			loaddataMaterials();
+		},
+		search : function(index) {
+			search(index);
+		},
+		searchmaterials : function(index) {
+			searchmaterials(index);
+		},
+		addMaterials : function() {
+			debugger;
+			var whid = $("#whid").val();
+		    if (typeof (whid) == "undefined" || whid == "") {
+		    	gener.tip("请选择退货仓库！");
+		    	return;
+		    }
+		    var type = $("#type").val();
+		    if (typeof (type) == "undefined" || type == "") {
+		    	gener.tip("请选择退货类型！");
+		    	return;
+		    }
+		    var agentid = $("#agentid").val();
+		    if (typeof (agentid) == "undefined" || agentid == "") {
+		    	gener.tip("无此代理商，请自建代理商！");
+		    	return;
+		    }
+		    gener.dialog({
+			url : "/ReturnsManage/addMaterials?info.whid=" +whid+ "&info.type=" +type+"&info.agentid="+agentid,
+			title : '物料列表',
+			width : '80%',
+			height : '90%',
+			func : function() {
+
+			}
+		    });
+		},
+		checkOne : function(obj) { 
+		    // 维护已选数组
+		    debugger;
+		    var currow = $(obj).closest("tr");
+		    if ($(obj).prop("checked")) { // 勾选则插入
+	    	var obj = new Object();
+			obj.id = currow.find("td").eq(1).text();
+			obj.materialcode = currow.find("td").eq(2).text();
+			obj.materialname = currow.find("td").eq(3).text();
+			obj.groupname = currow.find("td").eq(4).text();
+			obj.availablemyamount = currow.find("td").eq(5).text();
+			obj.availableagentamount = currow.find("td").eq(6).text();
+			obj.reservestock = currow.find("td").eq(7).text();
+			obj.pricetrue = currow.find("td").eq(8).text();
+			obj.power = currow.find("td").eq(9).text();
+			obj.ifmainmaterial = currow.find("td").eq(10).text();
+			obj.materialgroup = currow.find("td").eq(11).text();
+			checkeds.push(obj);
+		    }else { // 取消勾选则删除
+				for (var i = 0; i < checkeds.length; i++) {
+				    if (checkeds[i].materialcode == currow.find("td").eq(2).children("div:first-child").attr("title")) {
+					checkeds.splice(i, 1);
+					break; // 终止循环
+				    }
+				}
+		    }
+		},
+		ac_Materials : function(){
+		    if (checkeds.length == 0) {
+				gener.tip("请勾选物料！");
+				return;
+		    }
+		    var tablehtml = "";
+		    var table = parent.$("#grid_tbody");
+		    var type = $("#type").val();
+		    var reservetype = $("#reservetype").val();
+//		    var seq = table[0].rows.length + 1;
+		    var seq = parent.$("#grid_tbody").find("tr:not(.openclose)").length + 1;
+		    $(checkeds).each(function() {
+		    	var amtds="";
+		    	if(type==1){
+		    		amtds+= "<td>"
+						    + this.availablemyamount
+						    + "<input type='hidden' name='info.availablemyamount' value='"+this.availablemyamount+"'/>"
+						    + "</td>";
+		    	}else if(type==2){
+		    			amtds+= "<td>"
+							    + this.availableagentamount
+							    + "<input type='hidden' name='info.availableagentamount' value='"+this.availableagentamount+"'/>"
+							    + "</td>";
+		    	}else if(type==3){
+		    			amtds+= "<td>"
+							    + this.reservestock
+							    + "<input type='hidden' name='info.reservestock' value='"+this.reservestock+"'/>"
+							    + "</td>";
+		    	}
+				var existcount = 0;
+				if (table.find("input[name='info.materialcodes'][value='" + this.materialcode + "']").length > 0) {
+				    existcount++;
+				} else {
+					var confirmhtml = "";
+					/*if(this.ifmainmaterial==1){
+						confirmhtml = "<a class=\"addConfigureMaterial\" onclick=\"returnsmanage.addConfigureMaterial("+seq+",0,0,'"+this.materialcode+"');\"  style=\"padding-left:10px\" ><i class=\"fa fa-plus-circle\" font-size=\"15px\"></i></a>" 
+									+ "<a class=\"collapse-link\" onclick=\"returnsmanage.clickcollapse(this,"+seq+")\" style=\"padding-left:10px\" ><i class=\"fa fa-chevron-down\" font-size=\"15px\"></i></a>";
+					}*/
+				    tablehtml += "<tr class='parentmaterialtr'>" + "<td name='seq'>"
+					    + seq
+					    + "</td>"
+					    + "<td>"
+					    + this.materialcode
+					    + "</td>"
+					    + "<td>"
+					    + this.materialname
+					    + "</td>" 
+					    + "<td>"
+					    + this.groupname
+					    + "<input type='hidden' name='info.materialgroup' value='"+this.materialgroup+"'/>"
+					    + "</td>"
+					    + amtds
+					    + "<td>"
+					    + this.pricetrue
+					    + "<input type='hidden' name='info.pricetrue' value='"+this.pricetrue+"'/>"
+					    + "</td>"
+					    + "<td>"
+					    + this.power
+					    + "<input type='hidden' name='info.power' value='"+this.power+"'/>"
+					    + "</td>"
+					    + "<td><input type='text' class='form-control' name='info.amount' onkeyup='gener.checkNumber(this,1,10000000); changeamount();' onblur='gener.checkNumber(this,1,10000000);'/></td>"
+					    + "<td><a onclick=\"returnsmanage.rowDel(this,0,0,'"+this.materialcode+"');\" class='btn btn-xs btn-success btn-outline' style='margin-bottom:0;'><i class='fa fa-trash-o'></i> 删除</a><input type='hidden' name='info.materialcodes' value='"
+					    + this.materialcode + "'>" 
+					    //+ confirmhtml
+			    		+ "</td>" + "</tr>";
+				    /*if(this.ifmainmaterial==1){
+				    	tablehtml += "<tr class=\"openclose\" id=\"openclose"+seq+"\">" 
+								  +  "<td class=\"foldopen\" id=\"foldopen"+seq+"\" colspan=\"9\" style=\"width:80%\">"
+								  +  "<table style=\"border-collapse:collapse;border: 2px solid #ABABAB;\">" 
+								  +  "<tbody class=\"gridconfigure\" id=\"gridconfigure"+(seq)+"\">"
+								  +  "</table>"
+								  +  "</td>"
+								  +  "</tr>"
+				    }*/
+				    seq++;
+				}
+	    	})
+		    table.append(tablehtml);
+		    gener.dialogClose();
+		},
+		
+		submit_addReturngoods:function(){
+			var anwhid = $("#anwhid").val();
+		    if (typeof (anwhid) == "undefined" || anwhid == "") {
+		    	gener.tip("请选择良品到货仓库！", $("#anwhid"));
+		    	return;
+		    }
+		    /*var anbadwhid = $("#anbadwhid").val();
+		    if (typeof (anbadwhid) == "undefined" || anbadwhid == "") {
+		    	gener.tip("请选择不良品到货仓库！", $("#anbadwhid"));
+		    	return;
+		    }*/
+			var provinceid = $("#province1 option:selected").val();
+		    if (typeof (provinceid) == 'undefined' || provinceid == null || provinceid == '0') {
+			gener.tip("请选择省", $("#province1"));
+			return;
+		    }
+		    var city1 = $("#city1 option:selected").val();
+		    if (typeof (city1) == 'undefined' || city1 == null || city1 == '0') {
+		    	gener.tip("请选择市", $("#city1"));
+		    	return;
+		    }
+		    var area1 = $("#area1 option:selected").val();
+		    if (typeof (area1) == 'undefined' || area1 == null || area1 == '0') {
+		    	gener.tip("请选择县", $("#area1"));
+		    	return;
+		    }
+		    if($('input[name="info.materialobject"]:checked').val() == undefined){
+		    	gener.tip("请选择实物是否退货", $(".defaultware"));
+		    	return;
+    		}
+			var results=1;
+			$("#grid_parent").find("input[name='info.amount']").each(function(){
+				if($.trim($(this).val())=="" || $.trim($(this).val())=='undefined'){
+					gener.tip("请输入退货数量",$(this));
+					results=0;
+					return false;
+				}
+				if($.trim($(this).val())==0){
+					gener.tip("退货数量不能为0",$(this));
+					results=0;
+					return false;
+				}
+				var type = $("#type").val();
+				if(type==1){
+					if(parseInt($(this).val()) > parseInt($(this).parent().siblings().find("input[name='info.availablemyamount']").val())){
+						gener.tip("退货数量不能大于可用自有数量",$(this));
+						results=0;
+						return false;
+					}
+				}else if(type==2){
+					if(parseInt($(this).val()) > parseInt($(this).parent().siblings().find("input[name='info.availableagentamount']").val())){
+						gener.tip("退货数量不能大于可用托管数量",$(this));
+						results=0;
+						return false;
+					}
+				}else if(type==3){
+					if(parseInt($(this).val()) > parseInt($(this).parent().siblings().find("input[name='info.reservestock']").val())){
+						gener.tip("退货数量不能大于储备数量",$(this));
+						results=0;
+						return false;
+					}
+				}
+				//验证子料
+				/*var sendamount = Number($(this).val());// 实发数量
+				if((/^(\+|-)?\d+$/.test( sendamount )) && sendamount > 0){//拣配数量大于0,就压迫判断是否主料号已配置
+					var mainmaterialdiv = $(this).find(".addConfigureMaterial")
+					if(typeof(mainmaterialdiv)!="undefined"){
+						var confignum = Number($(this).parent().parent().find("td:first").html());
+						var gridconfigure = document.getElementById("gridconfigure"+confignum);
+						if(gridconfigure!=null){
+							if(gridconfigure.rows.length>0){//需要配置子物料
+								var totalchildamount=0;
+								var childcodeArr = new Array();
+								$(gridconfigure.rows).each(function(j){
+									var childamount = $(this).find("input[name='configurelist.amount']").val();
+									var childcode   = $(this).find(".childmaterialcode  option:selected").val();
+									if(typeof(childamount)!="undefined"){
+										if((/^(\+|-)?\d+$/.test( childamount )) && childamount>0){
+											totalchildamount += Number(childamount); 
+										}else{
+			   								gener.alert("子料号数量必须为正整数！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+		   								gener.alert("子料号数量不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+		   								results=0;
+		   								return false;
+		   							}
+									if(typeof(childcode)!="undefined"){
+										if($.trim( childcode )!=""){
+											var index = $.inArray(childcode,childcodeArr);
+											if (index >= 0) {
+												gener.alert("同一个物料不能配置相同的子料号！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+												results=0;
+												return false;
+											} else {
+												childcodeArr.push(childcode); 
+											}
+										}else{
+			   								gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+										gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+										results=0;
+										return false;
+		   							}
+								});
+								//销售单某个bom中的相关数量
+								if(results==1){
+									var maxnum = sendamount;//拣配数量
+									if(Number(maxnum)-Number(totalchildamount)!=0){//填写的拆分单数据超过总数量
+										gener.alert("子料号总数量必须等于可配置数量！</br>子料号总数量为:"+totalchildamount+"</br>可配置数量为:"+maxnum+"</br><span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行数量</span>");
+										results=0;
+										return false;
+									}
+								}
+							}else{
+								gener.alert("子料号必须要配置！<span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行子料号</span>");
+								results=0;
+								return false;
+							}
+						}
+					}
+				}*/
+			});
+			if(results==0){
+				return;
+			}
+			debugger
+			var linklist=new Array();
+			var configlist=new Array();
+		    var parenttrs=$("#grid_tbody").find("tr[class='parentmaterialtr']");
+			$.each(parenttrs,function(){
+				var materialcodes = $(this).find("[name='info.materialcodes']").val();
+				if(typeof(materialcodes)!="undefined"){
+					var obj= {
+						    "pricetrue":$(this).find("input[name='info.pricetrue']").val(),
+						    "amount":$(this).find("input[name='info.amount']").val(),
+						    "availablemyamount":$(this).find("input[name='info.availablemyamount']").val(),
+						    "availableagentamount":$(this).find("input[name='info.availableagentamount']").val(),
+						    "reservestock":$(this).find("input[name='info.reservestock']").val(),
+						    "materialcodes":$(this).find("[name='info.materialcodes']").val()};
+						linklist.push(obj);
+				}
+			});
+			var childtrs=$("#grid_tbody").find("tr[class='childmaterialtr']");
+			$.each(childtrs,function(){
+				var childmaterialcode = $(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(); 
+				if(typeof(childmaterialcode)!="undefined"){
+					var configobj= {
+							"amount":$(this).find("input[name='configurelist.amount']").val(),
+							"childmaterialcode":$(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(),
+							"parentmaterialcode":$(this).find("input[name='configurelist.parentmaterialcode']").val(),
+							"fromid":$(this).find("input[name='configurelist.fromid']").val(),
+							"bomid":$(this).find("input[name='configurelist.bomid']").val()};
+					configlist.push(configobj);
+				}
+			});
+			if(linklist.length==0){
+			     gener.tip("请添加物料！");
+			     return;
+			}
+			var info = $("#addform").serializeJson();
+			$.extend(info, {"materiellist":linklist},{"configlist":configlist});
+			if($("#addform").valid()){
+				gener.ajaxPost("/ReturnsManage/ac_addReturngoods",info,function(result) {
+				    if (result.state == 1) {
+						gener.success(result.msg, function() {
+							// 跳转页面（这步必须放在刷新列表前面）
+						    $(".btn-close").click();
+						    // 刷新列表数据
+							$("#grid").flexReload();
+						});
+				    } else {
+					   gener.error(result.msg);
+				    }
+				});	
+			}
+		},
+		
+		
+		/**
+		 * 质检提交
+		 * @returns
+		 */
+		new_subCheckReturngoods:function(){
+			var approve = $("#form1").serializeJson();
+			var approveresult = $("input[name='approveresult']:checked").val();//审核结论
+			
+			var returnid = $("#returnid").val();
+			var returnstate = $("#returnstate").val();
+			var materialobject = $('input[name="info.materialobject"]:checked').val();
+			if(materialobject == undefined){
+		    	gener.tip("请选择实物是否退货", $(".defaultware"));
+		    	return;
+    		}
+			results=1;
+			if(returnstate==6 && approveresult==1){
+				$("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+					debugger
+					 var temp = $(this).find("th").eq(0).html()-1;//数组标识
+					 //检查子料号
+					 var mainmaterialdiv = $(this).find(".addConfigureMaterial");
+					 if(typeof(mainmaterialdiv)!="undefined" && mainmaterialdiv!=null && mainmaterialdiv!=""){
+						 var confignum = Number($(this).find("th:first").html());
+						 var gridconfigure = document.getElementById("gridconfigure"+confignum);
+						 if(gridconfigure!=null){
+							 if(gridconfigure.rows.length>0){//需要配置子物料
+								var totalchildamount=0;
+								var childcodeArr = new Array();
+								$(gridconfigure.rows).each(function(j){
+									debugger
+									var childcode   = $(this).find(".childmaterialcode  option:selected").val();
+									if(typeof(childcode)!="undefined"){
+										if($.trim( childcode )!=""){
+											var index = $.inArray(childcode,childcodeArr);
+											if (index >= 0) {
+												gener.alert("同一个物料不能配置相同的子料号！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+												results=0;
+												return false;
+											} else {
+												childcodeArr.push(childcode); 
+											}
+										}else{
+			   								gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+										gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+										results=0;
+										return false;
+		   							}
+									
+									var goodnum = $.trim($(this).find("input[name='configurelist.goodnum']").val());//良品数
+									var goodpricetrue = $.trim($(this).find("input[name='configurelist.goodpricetrue']").val());//良品单价
+									var badnum = $.trim($(this).find("input[name='configurelist.badnum']").val());//不良品数
+									var badpricetrue = $.trim($(this).find("input[name='configurelist.badpricetrue']").val());//不良品单价
+									var scrapnum = $.trim($(this).find("input[name='configurelist.scrapnum']").val());//报废数
+									if(typeof(goodnum)!="undefined"){
+										if( goodnum>=0 && (/^(\+|-)?\d+$/.test( goodnum ))){
+											totalchildamount += Number(goodnum); 
+										}else{
+			   								gener.alert("子料号良品数量必须大于等于0！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+		   								gener.alert("子料号良品数量不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+		   								results=0;
+		   								return false;
+		   							}
+									
+									
+									if(typeof(badnum)!="undefined"){
+										if(badnum>=0 && (/^(\+|-)?\d+$/.test( badnum ))){
+											totalchildamount += Number(badnum); 
+										}else{
+			   								gener.alert("子料号不良品数量必须大于等于0！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+		   								gener.alert("子料号不良品数量不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+		   								results=0;
+		   								return false;
+		   							}
+									
+									if(typeof(scrapnum)!="undefined"){
+										if(scrapnum>=0 && (/^(\+|-)?\d+$/.test( scrapnum ))){
+											//totalchildamount += Number(goodnum); 
+										}else{
+			   								gener.alert("子料号报废品数量必须大于等于0！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+			   								results=0;
+			   								return false;
+			   							}
+									}else{
+		   								gener.alert("子料号报废品数量不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+		   								results=0;
+		   								return false;
+		   							}
+								});
+								//销售单某个bom中的相关数量
+								if(results==1){
+									debugger
+									var maxnum = Number($(this).find("td:eq(4)").text());//确认数量
+									
+									if(Number(totalchildamount) > Number(maxnum)){
+										gener.alert("<span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行数量</span></br>"+"子料良品与不良品总数不能超过已确认数！</br>子料号总数量为:"+totalchildamount+"</br>已确认数量为:"+maxnum);
+										results=0;
+										return false;
+									}
+									/*if(Number(maxnum)-Number(totalchildamount)!=0){//填写的拆分单数据超过总数量
+										gener.alert("<span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行数量</span></br>"+"子料良品与不良品总数跟已确认数不符！</br>子料号总数量为:"+totalchildamount+"</br>已确认数量为:"+maxnum);
+										results=0;
+										return false;
+									}*/
+								}
+							 }else{
+								gener.alert("子料号必须要配置！<span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行子料号</span>");
+								results=0;
+								return false;
+							}
+						 }
+					 }
+				});
+			}
+			if(results==0){
+				return;
+			}
+			
+			/*********************图片***********************************/
+			var imageList = new Array();
+			var documentlist = $(".links li").find("input[name='picture']");
+			if(returnstate==6 && approveresult==1){
+				if (documentlist.length == 0) {
+					gener.alert("请上传签收凭证!");
+					return;
+				}
+			}
+			$.each(documentlist, function() {
+				var obj = { "documentid":$(this).attr("documentid")
+						//,"documentname":$(this).attr("documentname"),
+						//"postfix":$(this).attr("postfix"),
+						//"documentsize":$(this).attr("documentsize"),
+						//"documentpath":$(this).attr("documentpath"), "thumbnailpath":$(this).attr("thumbnailpath"),
+						//"createuserid":$(this).attr("createuserid"),"documenttype":$(this).attr("documenttype")
+						};
+				imageList.push(obj);
+			});
+			if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写审核意见");
+				return;
+		    }
+			var configlist=new Array();
+			var childtrs=$("#grid_tbody").find("tr[class='childmaterialtr']");
+			
+			$.each(childtrs,function(){
+				var childmaterialcode = $(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(); 
+				if(typeof(childmaterialcode)!="undefined"){
+					var configobj= {
+							//"amount":$(this).find("input[name='configurelist.amount']").val(),
+							"goodnum":$(this).find("input[name='configurelist.goodnum']").val(),
+							"goodpricetrue":$(this).find("input[name='configurelist.goodpricetrue']").val(),
+							"badnum":$(this).find("input[name='configurelist.badnum']").val(),
+							"badpricetrue":$(this).find("input[name='configurelist.badpricetrue']").val(),
+							"scrapnum":$(this).find("input[name='configurelist.scrapnum']").val(),
+							"childmaterialcode":$(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(),
+							"parentmaterialcode":$(this).find("input[name='configurelist.parentmaterialcode']").val(),
+							"fromid":$(this).find("input[name='configurelist.fromid']").val(),
+							"bomid":$(this).find("input[name='configurelist.bomid']").val()};
+					configlist.push(configobj);
+				}
+			});
+			debugger			
+			var linklist=$("#form2").serializeJson();
+			//var info={"info.returnid":returnid,"info.returnstate":returnstate,"info.agentid":agentid,"info.returnno":returnno,"info.whid":whid,"info.anwhid":anwhid,"info.type":type,"info.areaid":areaid,"info.materialobject":materialobject,"configlist":configlist};
+			var info={"approve":approve,"imageList":imageList,"info.returnid":returnid,"info.returnstate":returnstate,"info.materialobject":materialobject,"configlist":configlist};
+			$.extend(info,linklist);
+			gener.confirm("确认提交质检结果？", function() {
+				gener.ajaxPost("/ReturnsManage/ac_subCheckResult", info, function(result) {
+				    if (result.state == 1) {
+						gener.success(result.msg, function() {
+							// 跳转页面（这步必须放在刷新列表前面）
+							$(".btn-close").click();
+		            		// 刷新列表数据
+							$("#grid").flexReload();
+						});
+				    } else {
+				    	gener.error(result.msg);
+				    }
+				});
+			});
+			
+		},
+		
+		/**
+		 * 审核提交（新的）
+		 * @returns
+		 */
+		submit_finallycheck:function(){
+			var approve = $("#form1").serializeJson();
+			var returnstate = $("#returnstate").val();
+			var returncosttrue = $("#returncost").val();
+			var approveresult = $("input[name='approveresult']:checked").val();
+			results=1;
+			if(returnstate==2 && approveresult==1){
+				$("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+					var temp = $(this).find("th").eq(0).html();//数组标识
+					var goodpricetrue = $(this).find("input[name='materiellist["+i+"].goodpricetrue']").val();//良品单价
+					var badpricetrue = $(this).find("input[name='materiellist["+i+"].badpricetrue']").val();//不良品单价
+					if(typeof(goodpricetrue)!="undefined" && goodpricetrue!=""){
+						if( goodpricetrue>=0){
+						}else{
+							gener.alert("良品单价必须大于等于0！<span style='font-size: 14px;color: red;'>注意:第"+temp+"行良品的价格</span>");
+							results=0;
+							return false;
+						}
+					}else{
+						gener.alert("良品单价不能为空！<span style='font-size: 14px;color: red;'>注意:第"+temp+"行良品的价格</span>");
+						results=0;
+						return false;
+					}
+					if(typeof(badpricetrue)!="undefined" && badpricetrue!="" ){
+						if( badpricetrue>=0){
+						}else{
+							gener.alert("不良品单价必须大于等于0！<span style='font-size: 14px;color: red;'>注意:第"+temp+"行不良品的价格</span>");
+							results=0;
+							return false;
+						}
+					}else{
+						gener.alert("不良品单价不能为空！<span style='font-size: 14px;color: red;'>注意:第"+temp+"行不良品的价格</span>");
+						results=0;
+						return false;
+					}
+				});
+			}
+			if(results==0){
+				return;
+			}
+		    if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写审核意见");
+				return;
+		    }
+			var linklist=$("#form2").serializeJson();
+			var info={"approve":approve,
+					  "info.returnstate":returnstate,
+					  "info.returncosttrue":returncosttrue};
+			info["approve.approveresult"]=approveresult;
+			$.extend(info,linklist);
+			gener.confirm("确认提交该审核的申请单!", function() {
+				gener.ajaxPost("/ReturnsManage/ac_finallyCheck", info, function(result) {
+				    if (result.state == 1) {
+						gener.success(result.msg, function() {
+							// 跳转页面（这步必须放在刷新列表前面）
+							$(".btn-close").click();
+		            		// 刷新列表数据
+							$("#grid").flexReload();
+						});
+				    } else {
+				    	gener.error(result.msg);
+				    }
+				});
+			});
+		},
+		
+		submit_checkReturngoods : function() {
+			var approve = $("#form1").serializeJson();
+			var returnstate = $("#returnstate").val();
+			var returncosttrue = $("#returncost").val();
+			var agentid = $("#agentid").val();
+			var returnno = $("#returnno").val();
+			var whid = $("#whid").val();
+			var anwhid = $("#anwhid").val();
+			var type = $("#type").val();
+			var reservetype = $("#reservetype").val();
+			var areaid = $("#areaid").val();
+			var materialobject = $('input[name="info.materialobject"]:checked').val();
+			if(materialobject == undefined){
+		    	gener.tip("请选择实物是否退货", $(".defaultware"));
+		    	return;
+    		}
+			
+			var approveresult = $("input[name='approveresult']:checked").val();//审核结论
+			//var approveresult = $("input[type='radio']:checked").val();//审核结论
+			results=1;
+			if(returnstate==2 && approveresult==1){
+				$("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+					 var temp = $(this).find("td").eq(0).html()-1;//数组标识
+					 var price=$(this).find("input[name='materiellist["+temp+"].pricetrue']").val();//单价
+					 if(typeof(price)=="undefined" || price==""){
+						 gener.tip("请填写单价");
+						 results=0;
+					     return false;
+					 }
+					 if(price<0){
+						 gener.tip("单价不能小于0");
+						 results=0;
+					     return false;
+					 }
+					 debugger
+					 //检查子料号
+					 var mainmaterialdiv = $(this).find(".addConfigureMaterial");
+						if(typeof(mainmaterialdiv)!="undefined" && mainmaterialdiv!=null && mainmaterialdiv!=""){
+							var confignum = Number($(this).find("td:first").html());
+							//var confignum = Number($(this).parent().parent().find("td:first").html());
+							var gridconfigure = document.getElementById("gridconfigure"+confignum);
+							if(gridconfigure!=null){
+								if(gridconfigure.rows.length>0){//需要配置子物料
+									var totalchildamount=0;
+									var childcodeArr = new Array();
+									$(gridconfigure.rows).each(function(j){
+										var childamount = $(this).find("input[name='configurelist.amount']").val();
+										var childcode   = $(this).find(".childmaterialcode  option:selected").val();
+										if(typeof(childamount)!="undefined"){
+											if((/^(\+|-)?\d+$/.test( childamount )) && childamount>0){
+												totalchildamount += Number(childamount); 
+											}else{
+				   								gener.alert("子料号数量必须为正整数！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+				   								results=0;
+				   								return false;
+				   							}
+										}else{
+			   								gener.alert("子料号数量不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行数量</span>");
+			   								results=0;
+			   								return false;
+			   							}
+										if(typeof(childcode)!="undefined"){
+											if($.trim( childcode )!=""){
+												var index = $.inArray(childcode,childcodeArr);
+												if (index >= 0) {
+													gener.alert("同一个物料不能配置相同的子料号！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+													results=0;
+													return false;
+												} else {
+													childcodeArr.push(childcode); 
+												}
+											}else{
+				   								gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+				   								results=0;
+				   								return false;
+				   							}
+										}else{
+											gener.alert("子料号不能为空！<span style='font-size: 14px;color: red;'>注意:第"+(confignum+"行的"+(j+1))+"行子料号</span>");
+											results=0;
+											return false;
+			   							}
+									});
+									//销售单某个bom中的相关数量
+									if(results==1){
+										debugger
+										var maxnum = Number($(this).find("td:eq(10)").text());
+										//var maxnum = sendamount;//拣配数量
+										if(Number(maxnum)-Number(totalchildamount)!=0){//填写的拆分单数据超过总数量
+											gener.alert("子料号总数量必须等于可配置数量！</br>子料号总数量为:"+totalchildamount+"</br>可配置数量为:"+maxnum+"</br><span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行数量</span>");
+											results=0;
+											return false;
+										}
+									}
+								}else{
+									gener.alert("子料号必须要配置！<span style='font-size: 14px;color: red;'>注意:第"+(confignum)+"行子料号</span>");
+									results=0;
+									return false;
+								}
+							}
+						}
+					 
+				 });
+			}
+			debugger
+			if(results==0){
+				return;
+			}
+			
+		    if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写质检意见");
+				return;
+		    }
+		    debugger
+		    var configlist=new Array();
+		    var childtrs=$("#grid_tbody").find("tr[class='childmaterialtr']");
+			$.each(childtrs,function(){
+				var childmaterialcode = $(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(); 
+				if(typeof(childmaterialcode)!="undefined"){
+					var configobj= {
+							"amount":$(this).find("input[name='configurelist.amount']").val(),
+							"childmaterialcode":$(this).find("select[name='configurelist.childmaterialcode'] option:selected").val(),
+							"parentmaterialcode":$(this).find("input[name='configurelist.parentmaterialcode']").val(),
+							"fromid":$(this).find("input[name='configurelist.fromid']").val(),
+							"bomid":$(this).find("input[name='configurelist.bomid']").val()};
+					configlist.push(configobj);
+				}
+			});
+		    
+			var linklist=$("#form2").serializeJson();
+			var info={"approve":approve,"info.returnstate":returnstate,"info.returncosttrue":returncosttrue,"info.agentid":agentid,"info.returnno":returnno,"info.whid":whid,"info.anwhid":anwhid,"info.type":type,"info.reservetype":reservetype,"info.areaid":areaid,"info.materialobject":materialobject,"configlist":configlist};
+			$.extend(info,linklist);
+//		    var trs=$("#grid_tbody").find("tr");
+//		    var i=0;
+//			$.each(trs,function(){
+//				i++;
+//			    var obj= {"price":$(this).find("input[name='mrlist["+i+"].price']").val()}
+//				linklist.push(obj);
+//			});
+			gener.confirm("确认提交该审核的申请单!", function() {
+				gener.ajaxPost("/ReturnsManage/ac_checkReturngoods", info, function(result) {
+				    if (result.state == 1) {
+						gener.success(result.msg, function() {
+							// 跳转页面（这步必须放在刷新列表前面）
+							$(".btn-close").click();
+		            		// 刷新列表数据
+							$("#grid").flexReload();
+						});
+				    } else {
+				    	gener.error(result.msg);
+				    }
+				});
+			});
+		},
+		
+		
+		newaddConfigureMaterial:function(seq,fromid,bomid,materialcode){
+			debugger
+			var itemtable = $("#gridconfigure"+seq);
+			var sno = 1;
+			var oldsno = itemtable.find("tr").length;
+			var lastrow = itemtable[0].rows[itemtable[0].rows.length - 1];
+			if (typeof(lastrow) != "undefined") {
+				sno = Number($(lastrow).find("td[name='sno']").html()) + 1;
+			}
+			var html = "";
+			var starthtml = "<tr class='childmaterialtr'><td width='48px;' name='sno'>"+sno+"</td>"
+				+	"<td width='10%' style='text-align: center;'>"
+				+		"<select class='selectpicker form-control childmaterialcode' style='width:100%;' name=\"configurelist.childmaterialcode\" onchange=\"newchoosechildmaterial(this,\'"+materialcode+"\')\">"
+				+			"<option value=''>不限</option>";
+			
+			var optionhtml = ""; 
+			var endhtml = "	</select>"
+					+	"</td>"
+	 			+	"<td ><input type=\"text\" style=\"text-align: center;\" class=\"form-control materialname\" value=\"\" readonly></td>"
+	 			+	"<td ><input type=\"text\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.goodnum\" value=\"0\" onkeyup=\"this.value=this.value.replace(/\\D/g,'')\" onafterpaste=\"this.value=this.value.replace(/\\D/g,'')\"></td>"
+	 			+	"<td ><input type=\"text\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.badnum\" value=\"0\" onkeyup=\"this.value=this.value.replace(/\\D/g,'')\" onafterpaste=\"this.value=this.value.replace(/\\D/g,'')\"></td>"
+	 			+	"<td ><input type=\"text\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.scrapnum\" value=\"0\" onkeyup=\"this.value=this.value.replace(/\\D/g,'')\" onafterpaste=\"this.value=this.value.replace(/\\D/g,'')\"></td>"
+				
+				+	"<td ><a class=\"\" onclick=\"returnsmanage.removeConfigureMaterial(this,'"+materialcode+"')\"><i class=\"fa fa-minus-circle\"></i></a></td>" 
+				+	"<input type=\"hidden\" style=\"text-align: center;\" class=\"form-control parentmaterialcode\" name=\"configurelist.parentmaterialcode\" value=\""+materialcode+"\" readonly>" 
+				+	"<input type=\"hidden\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.goodpricetrue\" value=\"0.000\" readonly>"
+				+	"<input type=\"hidden\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.badpricetrue\" value=\"0.000\" readonly>"
+				+	"<input type=\"hidden\" style=\"text-align: center;\" class=\"form-control\" name=\"configurelist.totalpricetrue\" value=\"0.000\" readonly>"
+				+	"<input type=\"hidden\" class=\"fromid\" name=\"configurelist.fromid\" value=\""+fromid+"\">" 
+				+	"<input type=\"hidden\" class=\"bomid\" name=\"configurelist.bomid\" value=\""+bomid+"\">"
+				+"</tr>";
+				if(materialMap!=null && materialMap.size>0){
+					materialArr = materialMap.materialcode;
+				}
+				if(typeof(materialArr)!="undefined" && materialArr!=null && materialArr.length>0){
+					for(var i=0;i<materialArr.length;i++){
+							optionhtml += "<option value='"+materialArr[i].materialcode+"'>"+materialArr[i].materialcode+"</option>"; 
+						}
+					html += (starthtml + optionhtml + endhtml);
+					if (html != "") {
+						itemtable.append(html);
+					}
+				}else{
+					var materialArr = new Array();
+					gener.ajaxPost("/SplitBill/getChildMaterial",{"materialcode":materialcode}, function(result) {
+						var materialList = result.value;
+				    	if(materialList!=null && materialList.length>0){
+				 			for(var i=0;i<materialList.length;i++){
+				 				materialArr.push(materialList[i]); 
+				 				optionhtml += "<option value='"+materialList[i].materialcode+"'>"+materialList[i].materialcode+"</option>"; 
+				 			}
+				 			materialMap.set(materialcode,materialArr);
+				 			html += (starthtml + optionhtml + endhtml);
+				 			if (html != "") {
+				 				itemtable.append(html);
+				 			}
+				 		}else{
+				 			gener.alert("该物料暂无子料号!");
+				 		}
+					});
+				}
+			
+			
+		},
+		
+		/**
+		 * 配置化物料
+		 */
+		addConfigureMaterial:function(seq,fromid,bomid,materialcode){
+			debugger
+			var itemtable = $("#gridconfigure"+seq);
+			var sno = 1;
+			var oldsno = itemtable.find("tr").length;
+			var lastrow = itemtable[0].rows[itemtable[0].rows.length - 1];
+			if (typeof(lastrow) != "undefined") {
+				sno = Number($(lastrow).find("td[name='sno']").html()) + 1;
+			}
+			var html = "";
+			var starthtml = "<tr class='childmaterialtr'><td width='5%' name='sno'>"+sno+"</td>"
+	 						+	"<td width='8%' style='text-align: center;'>"
+	 						+		"<select class='selectpicker form-control childmaterialcode' style='width:100%;' name=\"configurelist.childmaterialcode\" onchange=\"choosechildmaterial(this,\'"+materialcode+"\')\">"
+	 						+			"<option value=''>不限</option>";
+			var optionhtml = ""; 
+			var endhtml = "			</select>"
+		 					+	"</td>"
+				 			+	"<td width='20%'><input type=\"text\" style=\"text-align: center;\" class=\"form-control materialname\" value=\"\" readonly></td>"
+				 			+	"<td width='6%'><input type=\"text\" style=\"text-align: center;\" class=\"form-control groupname\" value=\"\" readonly></td>"
+				 			+	"<td width='8%'><input type=\"text\" class=\"form-control\" readonly></td>"
+				 			+	"<td width='6%'><input type=\"text\" class=\"form-control\" readonly></td>"
+				 			+	"<td width='6%'><input type=\"text\" class=\"form-control\" readonly></td>"
+							+	"<td width='8%'><input type=\"text\" style=\"text-align: center;\" class=\"form-control amount\" name=\"configurelist.amount\" value=\"\" onkeyup=\"this.value=this.value.replace(/\D/g,'')\" onafterpaste=\"this.value=this.value.replace(/\D/g,'')\"></td>"
+							+	"<td width='8%'><a class=\"\" onclick=\"returnsmanage.removeConfigureMaterial(this,'"+materialcode+"')\"><i class=\"fa fa-minus-circle\"></i></a></td>" 
+							+	"<input type=\"hidden\" style=\"text-align: center;\" class=\"form-control parentmaterialcode\" name=\"configurelist.parentmaterialcode\" value=\""+materialcode+"\" readonly>" 
+							+	"<input type=\"hidden\" class=\"fromid\" name=\"configurelist.fromid\" value=\""+fromid+"\">" 
+							+	"<input type=\"hidden\" class=\"bomid\" name=\"configurelist.bomid\" value=\""+bomid+"\">"
+							+"</tr>";
+			if(materialMap!=null && materialMap.size>0){
+				materialArr = materialMap.materialcode;
+			}
+			if(typeof(materialArr)!="undefined" && materialArr!=null && materialArr.length>0){
+				for(var i=0;i<materialArr.length;i++){
+	 				optionhtml += "<option value='"+materialArr[i].materialcode+"'>"+materialArr[i].materialcode+"</option>"; 
+	 			}
+				html += (starthtml + optionhtml + endhtml);
+				if (html != "") {
+					itemtable.append(html);
+				}
+			}else{
+				var materialArr = new Array();
+				gener.ajaxPost("/SplitBill/getChildMaterial",{"materialcode":materialcode}, function(result) {
+					var materialList = result.value;
+			    	if(materialList!=null && materialList.length>0){
+			 			for(var i=0;i<materialList.length;i++){
+			 				materialArr.push(materialList[i]); 
+			 				optionhtml += "<option value='"+materialList[i].materialcode+"'>"+materialList[i].materialcode+"</option>"; 
+			 			}
+			 			materialMap.set(materialcode,materialArr);
+			 			html += (starthtml + optionhtml + endhtml);
+			 			if (html != "") {
+			 				itemtable.append(html);
+			 			}
+			 		}else{
+			 			gener.alert("该物料暂无子料号!");
+			 		}
+				});
+			}
+		},
+		
+		/**
+		 * 删除
+		 */
+		removeConfigureMaterial:function(obj){
+			var curTr = $(obj).parent().parent(); 
+			$.each(curTr.nextAll(),function(){
+				var sno = $(this).find("td:first").html(); 
+				sno = Number(sno)-1;
+				$(this).find("td:first").html(sno); 
+			});
+			curTr.remove();
+		},
+		/**
+		 * 展开折叠
+		 */
+		clickcollapse:function(obj,seq){
+			debugger
+			var e = $(obj).children("i");
+			e.toggleClass("fa-chevron-up").toggleClass("fa-chevron-down");
+			var isvisible = $("#foldopen"+seq).is(':visible');
+			if(isvisible){
+				$("#foldopen"+seq).hide();
+			}else{
+				$("#foldopen"+seq).show();
+			}
+			var isopenclose = $("#openclose"+seq).is(':visible');
+			if(isopenclose){
+				$("#openclose"+seq).hide();
+			}else{
+				$("#openclose"+seq).show();
+			}
+		},
+		
+		/**
+		 * 删除
+		 * @param obj
+		 */
+		rowDel:function(obj,fromid,bomid,materialcode){
+			var curTr=$(obj).parents("tr");
+			var closeord = Number($(obj).parent().parent().find("td[name='seq']").html());
+			if(typeof(closeord) != "undefined"){
+				$("#openclose"+closeord).remove();
+			}
+			$.each(curTr.nextAll(),function(){
+				var orderTd=$(this).find("td[name='seq']");
+				var oldsno = Number(orderTd.html()); 
+				if(typeof(oldsno)!="undefined"){
+					var sno =  Number(orderTd.html()-1); 
+					orderTd.html(sno);
+					$(this).find(".addConfigureMaterial").attr("onclick","returnsmanage.addConfigureMaterial("+sno+","+fromid+","+bomid+",'"+materialcode+"')");
+					$(this).find(".collapse-link").attr("onclick","returnsmanage.clickcollapse(this,"+sno+")");
+					$("#openclose"+oldsno).attr("id","openclose"+sno);
+					$("#foldopen"+oldsno).attr("id","foldopen"+sno);
+					$("#gridconfigure"+oldsno).attr("id","gridconfigure"+sno);
+				}
+			});
+			curTr.remove(); 
+			$(obj).parent().parent().remove(); 
+		},
+		//内部交易添加详情弹窗
+		detailsReturnsgoodsDialog:function(returnid){
+			gener.dialog({
+				url : '/ReturnsManage/detailsReturngoodsDialog?returnid='+returnid,
+				title : '退货详情',
+				width : "90%",
+				height : "90%",
+			});
+		},
+		
+		ac_checksure:function(){
+			if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写确认说明");
+				return;
+		    }
+			gener.confirm("已确认该退货单信息？",function(){
+				var approve=$("#form1").serializeJson();
+				gener.ajaxPost("/ReturnsManage/ac_checkSure",{"approve":approve}, function(result) {
+					if (result.state == 1) {
+						gener.success(result.msg, function() {
+							$(".btn-close").click();
+							// 刷新列表数据
+							$("#grid").flexReload();
+						});
+					}else {
+						gener.alert(result.msg);
+					}
+				});
+			});
+		},
+		
+		ac_selectstock:function(){
+			debugger
+			var anwhid = $("#anwhid").val();
+			if(anwhid==""){
+				gener.tip("必须选择良品仓",$("#anwhid"));
+				return;
+			}
+			var anbadwhid = $("#anbadwhid").val();
+			if(anbadwhid == ""){
+				gener.tip("必须选择不良品仓",$("#anbadwhid"));
+				return;
+			}
+			var info=$("#selectfrom").serializeJson();
+			gener.confirm("确定提交？",function(){
+				gener.ajaxPost("/ReturnsManage/ac_selectWarehouse",{"info":info}, function(result) {
+					if (result.state == 1) {
+						gener.success(result.msg, function() {
+							$(".btn-close").click();
+							// 刷新列表数据
+							$("#grid").flexReload();
+						});
+					}else {
+						gener.alert(result.msg);
+					}
+				});
+			});
+		},
+		
+		
+	/**********************************图片上传 开始**************************/
+       /*upload:function(obj){
+    	   fileupdown.uploadByTemp($(obj).attr("id"),1,function(data){
+    		   var order = $(".links li").length; 
+    		   $(".links").append("<li  style='width:48px; height:48px;margin-left:5px'"
+						 + "documentid='" + data.fileid + "' " 
+						 + "id='imageLink"+order+"'>"
+						 + "<img data-original='" + data.filepath + "' " 
+						 + "src='" + data.litimgpath + "' "
+						 + "alt='" + data.filename + "' >" 
+						 + "<input type='hidden' name='picture'" +
+				        		"documentid='"+data.fileid+"' " +
+				        		"documentname='"+data.filename+"' " +
+				        		"postfix='"+data.postfix+"' " +
+				        		"documentsize='"+data.filesize+"' " +
+				        		"documentpath='"+data.filepath+"' " +
+				        		"createuserid='"+$("#senduserid").val()+"' " +
+				        		"documenttype='"+data.filetype+"' " +
+				        		"thumbnailpath='"+data.litimgpath+"'>"
+						 + "<a onclick='returnsmanage.delpicture(this)'><i class='fa fa-minus-circle'></i></a>"
+						 +"</li>");
+				$(".docs-pictures").viewer("destroy").viewer({
+					    url: "data-original"
+				});
+				 $("#file").val("");
+    	   });
+       },
+       delpicture:function(obj){
+		   var curli = $(obj).parent("li");
+		   $.each(curli.nextAll(),function(){
+			   var linkid = $(this).attr("id");
+			   var linkarr = linkid.split("imageLink");
+			   sno = Number(linkarr[1])-1;
+			   $(this).attr("id","imageLink"+sno); 
+		   }); 
+		   curli.remove(); 
+	   },*/
+		newupload:function(obj){
+    	   fileupdown.onlyupload($(obj).attr("id"),1,function(data){
+    		   var order = $(".links li").length; 
+    		   $(".links").append("<li  style='margin-left:0px'"
+						 + "documentid='" + data.fileid + "' " 
+						 + "id='imageLink"+order+"'>"
+						 + "<img  style='width:42px;height:42px;'  data-original='" + data.litimgpath + "' " 
+						 + "src='" + data.litimgpath + "' "
+						 + "alt='" + data.filename + "' >" 
+						 + "<input type='hidden' name='picture'" +
+				        		"documentid='"+data.fileid+"'/>"
+				        		//"documentname='"+data.filename+"' " +
+				        		//"postfix='"+data.postfix+"' " +
+				        		//"documentsize='"+data.filesize+"' " +
+				        		//"documentpath='"+data.filepath+"' " +
+				        		//"createuserid='"+$("#senduserid").val()+"' " +
+				        		//"documenttype='"+data.filetype+"' " +
+				        		//"thumbnailpath='"+data.litimgpath+"'" 
+				        		//+"/>"
+						 + "<a onclick='returnsmanage.newdelpicture(this,"+data.fileid+")'><i class='fa fa-minus-circle'></i></a>"
+						 +"</li>");
+				 $(".docs-pictures").viewer("destroy").viewer({
+					    url: "data-original"
+					});
+				 $("#file").val("");
+    	   });
+       },
+       newdelpicture:function(obj,documentid){
+		   if(documentid!=null){
+			   gener.ajaxPost("/FileUpDown/ac_delfile",{ "documentid":documentid },function(result){
+					if(result!=null){
+						if(result.state==1){
+							gener.success(result.msg,function(){
+								var curli = $(obj).parent("li");
+								curli.remove(); 
+							});
+						}else{
+							gener.error(result);
+						}
+					}else{
+						gener.error("系统异常！");
+					}
+				});
+		   }
+	   },
+       /**********************************图片上传 结束**************************/
+	  
+	   init_completeAgentname : function() {
+			$("#showname").bsSuggest({
+				url : "/OfficialOrder/searchOrgname?agentname=",
+				effectiveFields : [ "showname" ],
+				getDataMethod : "url",
+				allowNoKeyword : false,
+				delayUntilKeyup : true,
+				idField : "id",
+				keyField : "showname",
+				showBtn : false,
+			}).on("onSetSelectValue", function(e, row) {
+				if (row != undefined && row.id != undefined) {
+					$("#agentid").val(row.id);
+					$("#agentwarehouse").html("");
+					gener.ajaxPost("/ReturnsManage/getAgentWarehouse", {"orgid":row.id},function(result){
+						debugger
+						var optionHtml = "";
+						var data = result;
+						if(data!=null && data.length >0){
+							for(var i = 0; i < data.length; i++){
+								optionHtml +="<option value='"+data[i].whid+"'>"+data[i].whname+"</option>";
+							}
+						}
+						var selectHtml ="<select id='whid' name='info.whid' class='selectpicker form-control' style='width:100%;' onchange='changewhouse();'>"+optionHtml+"</select>";
+						$("#agentwarehouse").html(selectHtml);
+					});
+				}else{
+					$("#agentwarehouse").html("");
+				}
+			});
+		},
+	   
+	   
+	}	
+}();
+
+
+/**
+ * 新配置子料
+ * @param sno
+ * @param materialcode
+ */
+function newchoosechildmaterial(obj,materialcode){
+	debugger;
+	var curmaterial = $(obj).find("option:selected").val();
+	if(materialMap!=null && materialMap.size>0){
+		materialArr = materialMap.get(materialcode);
+	}
+	if(typeof(curmaterial)!='undefined' && $.trim(curmaterial)!=""){
+		if(materialArr!=null && materialArr.length>0){
+			for(var i=0;i<materialArr.length;i++){
+				var opmaterial = materialArr[i]; 
+				if(opmaterial!=null && curmaterial==opmaterial.materialcode){
+					$(obj).parent().parent().find(".materialname").val(opmaterial.materialname);
+				}
+			}
+		}
+	}else{
+		$(obj).parent().parent().find(".materialname").val("");
+	}
+}
+
+
+
+function newchangeprice(){
+	debugger
+	var total = 0;
+	  $("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+		  debugger
+		  var temp = $(this).find("th").eq(0).html()-1;//数组标识
+		  var goodnum = $(this).find("input[name='materiellist["+temp+"].goodnum']").val();
+		  var badnum = $(this).find("input[name='materiellist["+temp+"].badnum']").val();
+		  var goodpricetrue = $(this).find("input[name='materiellist["+temp+"].goodpricetrue']").val();
+		  var badpricetrue = $(this).find("input[name='materiellist["+temp+"].badpricetrue']").val();
+		  
+		  if(typeof(goodpricetrue)=="undefined"){
+			  goodpricetrue = 0.00;
+		  }
+		  if(typeof(badpricetrue)=="undefined"){
+			  badpricetrue = 0.00;
+		  }
+		  var totalprice = goodpricetrue*1000*goodnum/1000+badpricetrue*1000*badnum/1000;//总价
+	      var money = parseFloat(totalprice.toFixed(3));//总价（保留两位小数）
+		  if (money) {
+		     total += money;//退货金额
+		  }
+		  //$(this).find("td").eq(13).html(money.toFixed(3));
+		  $(this).find("input[name='materiellist["+temp+"].totalpricetrue']").val(money.toFixed(3));
+	  });
+	$("#returncost").val(Number(total).toFixed(3));//退货金额（保留两位小数）
+}
+
+
+
+
+function changeprice(){
+	var total = 0;
+	  $("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+		  debugger;
+		  var temp = $(this).find("td").eq(0).html()-1;//数组标识
+		  var amount = $(this).find("td").eq(10).html();//退货数量
+		  var price=$(this).find("input[name='materiellist["+temp+"].pricetrue']").val();//单价
+		  if(typeof(price)=="undefined"){
+			  price = 0.00;
+		  }
+		  var totalprice = price*1000*amount/1000;//总价
+	      var money = parseFloat(totalprice.toFixed(2));//总价（保留两位小数）
+		    if (money) {
+		      total += money;//退货金额
+		    }
+		  $(this).find("td").eq(13).html(money.toFixed(2));
+	  });
+//	var totalpricenum = 0;
+//	$.each(obj,function(){
+//		var amount =  $(obj).parent().prev().html();
+//		var price = $(obj).val(); 
+//		var totalprice = amount*price;
+//		$(obj).parent().next().html(Number(totalprice).toFixed(2));
+//		totalpricenum+=$(obj).parent().next().html(Number(totalprice).toFixed(2));
+//	});
+	$("#returncost").val(Number(total).toFixed(2));//退货金额（保留两位小数）
+}
+function changeamount(){
+	var total = 0;
+	var totalpower = 0;
+	$("#grid_tbody tr[class='parentmaterialtr']").each(function (i) {
+		debugger;
+		var temp = $(this).find("td").eq(0).html()-1;//数组标识
+		var amount = $(this).find("input[name='info.amount']").val();//退货数量
+		var pricetrue = $(this).find("input[name='info.pricetrue']").val();//单价
+		var materialgroup = $(this).find("input[name='info.materialgroup']").val();//物料组
+		var power = 0;
+		if(materialgroup!=2){
+			power = $(this).find("input[name='info.power']").val();//功率
+		}
+		var tpower = amount*power;//单个物料的总功率
+		totalpower += tpower;//退货总功率
+		if(typeof(pricetrue)=="undefined"){
+			pricetrue = 0.00;
+		}
+		var totalprice = amount*pricetrue;//总价
+		var money = parseFloat(totalprice.toFixed(2));//总价（保留两位小数）
+		if (money) {
+			total += money;//退货金额
+		}
+//		$(this).find("td").eq(10).html(money.toFixed(2));
+	});
+	$("#returncost").val(Number(total).toFixed(2));//退货金额（保留两位小数）
+	$("#totalcapacity").val(totalpower);//退货金额（保留两位小数）
+}
+function change (){
+    var type = $("#type").val();
+    if(type=='1' || type==''){
+        $(".myamount").show();
+        $(".agentamount").css("display", "none");
+        $(".reservestock").css("display", "none");
+    }else if(type=='2'){
+        $(".agentamount").show();
+        $(".myamount").css("display", "none");
+        $(".reservestock").css("display", "none");
+    }else if(type=='3'){
+        $(".reservestock").show();
+        $(".myamount").css("display", "none");
+        $(".agentamount").css("display", "none");
+    }
+}
+function changewhouse(){
+	$("#grid_tbody").html("");
+}
+/**
+ * 配置子料
+ * @param sno
+ * @param materialcode
+ */
+function choosechildmaterial(obj,materialcode){
+	debugger;
+	var curmaterial = $(obj).find("option:selected").val();
+	if(materialMap!=null && materialMap.size>0){
+		materialArr = materialMap.get(materialcode);
+	}
+	if(typeof(curmaterial)!='undefined' && $.trim(curmaterial)!=""){
+		if(materialArr!=null && materialArr.length>0){
+			for(var i=0;i<materialArr.length;i++){
+				var opmaterial = materialArr[i]; 
+				if(opmaterial!=null && curmaterial==opmaterial.materialcode){
+					$(obj).parent().parent().find(".materialname").val(opmaterial.materialname);
+					$(obj).parent().parent().find(".groupname").val(opmaterial.materialgroupname);
+				}
+			}
+		}
+	}else{
+		$(obj).parent().parent().find(".materialname").val("");
+		$(obj).parent().parent().find(".materialunit").val("");
+	}
+}
+
+//导出excle
+function exportReturn(){
+	var info = $("#search-form-grid").serializeJson();
+	gener.ajaxPost("/ReturnsManage/exportReturn",info,function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+				gener.dialogSuc();
+			});
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}

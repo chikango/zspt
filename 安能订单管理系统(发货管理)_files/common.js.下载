@@ -1,0 +1,605 @@
+﻿// 扩展Date的format方法
+Date.prototype.format = function(format) {
+		var o = {
+			"M+": this.getMonth() + 1,
+			"d+": this.getDate(),
+			"H+": this.getHours(),
+			"m+": this.getMinutes(),
+			"s+": this.getSeconds(),
+			"q+": Math.floor((this.getMonth() + 3) / 3),
+			"S": this.getMilliseconds()
+		}
+		if (/(y+)/.test(format)) {
+			format = format.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+		}
+		for (var k in o) {
+			if (new RegExp("(" + k + ")").test(format)) {
+				format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+			}
+		}
+		return format;
+	}
+/*通用js*/
+var gener = function() {
+	var layer_msg;
+	function ajaxPost(ajaxurl, pParms, sucFunction) {
+		if (ajaxurl.indexOf("?") > -1) {
+			ajaxurl += "&t=" + new Date().getMilliseconds();
+		} else {
+			ajaxurl += "?t=" + new Date().getMilliseconds();
+		}
+		
+		$.ajax({
+			type: "POST",
+			url: ajaxurl,
+			data: pParms,
+			beforeSend: function() {
+				layer_msg = layer.load(1, { // 风格为1的加载图标
+					shade: [0.1,'#fff'], // 遮罩层：0.1透明度的白色背景
+//					time: 5000, // 5秒后自动关闭（默认为0，不自动关闭）
+				});
+			},
+			success: function(result) {
+				sucFunction(result)
+			},
+			complete: function(XMLHttpRequest, textStatus) {
+				if(XMLHttpRequest.readyState==4){
+					hideMsg();
+				}
+			}
+		});
+	}
+	
+	function showMsg(msg, func, timer) {
+		setTimeout(function() {
+			if (timer == 0) {
+				layer_msg = layer.msg(msg, {
+					shade: [0.1,'#fff']
+				}, function() {
+					if (typeof(func) != "undefined")
+						func();
+				});
+			} else
+				layer_msg = layer.msg(msg, {
+					shade: [0.1,'#fff'],
+					time: timer
+				}, function() {
+					if (typeof(func) != "undefined")
+						func();
+				});
+		}, 20);
+	}
+
+	function hideMsg(func) {
+		if (layer_msg != undefined)
+			setTimeout(function() {
+				layer.close(layer_msg);
+				delete layer_msg;
+			}, 5);
+	}
+
+	function dialogSuc() {
+		var bValue = gener.data.dialog_result; // 读取B页面的数据
+		if (parent.gener != undefined && bValue == undefined) {
+			gener.data = parent.gener.data;
+			parent.gener.data = {};
+		}
+		var bValue = gener.data.dialog_result; // 读取B页面的数据
+		if (bValue != undefined && bValue == 'success') {
+			delete gener.data.dialog_result;
+			return true;
+		}
+		return false;
+	}
+
+	function dialogOkClose(func) {
+		parent.gener.data.dialog_result = "success";
+		if (typeof(func) != "undefined")
+			func();
+		gener.dialogClose();
+	}
+
+	function openDia(opt) {
+		var curLayer = layer;
+		if (parent.layer != undefined)
+			curLayer = parent.layer;
+		
+		if (opt.type == undefined)
+			opt.type = 2;
+		
+		opt.width = opt.width.toString();
+		opt.height = opt.height.toString();
+		if (opt.width.indexOf("%") == -1) {
+			if (opt.width.indexOf("px") == -1)
+				opt.width = opt.width + "px";
+		}
+		if (opt.height.indexOf("%") == -1) {
+			opt.height = opt.height.replace("px", "");
+			// 控制高度不超过浏览器高度
+			if (Number(opt.height) > $(window.top).height())
+				opt.height = ($(window.top).height()*0.9).toString();
+			
+			opt.height = opt.height + "px";
+		}
+		
+		curLayer.open({
+			type: opt.type,
+			title: opt.title,
+			shadeClose: false,
+			skin: opt.skin,
+			shade: 0.6,
+			scrollbar: false,
+			area: [opt.width, opt.height],
+			content: opt.url||opt.content,
+			end: function() {
+				if (dialogSuc()) {
+					if (typeof(opt.func) != "undefined")
+						opt.func();
+				}
+			}
+		});
+	}
+	function openDiaContent(opt){
+		var curLayer = layer;
+		if (parent.layer != undefined)
+			curLayer = parent.layer;
+		if (opt.type == undefined)
+			opt.type = 1;
+		curLayer.open({
+			type: opt.type,
+			title: opt.title,
+			shadeClose: false,
+			skin: opt.skin,
+			shade: 0.6,
+			scrollbar: false,
+			area: [opt.width + 'px', opt.height + 'px'],
+			content: opt.content,
+			end: function() {
+				if (dialogSuc()) {
+					if (typeof(opt.func) != "undefined")
+						opt.func();
+				}
+			}
+		});
+		
+	}
+	return {
+		/**
+		 * 动态数据请求
+		 */
+		data: {},
+		config:{
+				url:"http://127.0.0.1:8999"
+		},
+		/* post请求 */
+		ajaxPost: function(ajaxurl, parms, sucFunc, showBefore) {
+			return ajaxPost(ajaxurl, parms, sucFunc, showBefore);
+		},
+		// 隐藏所有的messenger
+		hideMsg: hideMsg,
+		showMsg: function(message, result) {
+			//			return showMsg(message);
+		},
+		tip: function(msg, ele, func) {
+			//如果有元素则在元素的下方提示错误信息，并给与焦点
+			if (ele != undefined) {
+				layer.tips(msg, ele, {
+					tips: [1, '#eb5635']
+				});
+				ele.focus();
+			} else {
+				showMsg(msg, func, 2000);
+			}
+		},
+		toast: function(msg, type, timer, func) {
+			if (typeof type == 'function') {
+				func = type;
+				type = "success";
+				timer = 2000;
+			}
+			if (timer == undefined) {
+				timer = 2000;
+			}
+			if (type == undefined) {
+				type = "success";
+			}
+			if (type != "loading") {
+				msg = "<i class='layer-icon-block layerfont icon-circle-" + type + "'></i>" + "<p class='layer-dia-p'>" + msg + "</p>";
+			} else {
+				msg = '<div class="layer-icon-toast"><div class="layer-icon_loading"><div class="layer-icon_loading_leaf layer-icon_loading_leaf_0"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_1"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_2"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_3"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_4"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_5"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_6"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_7"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_8"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_9"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_10"></div><div class="layer-icon_loading_leaf layer-icon_loading_leaf_11"></div></div></div>' + "<p class='layer-dia-p'>" + msg + "</p>";
+			}
+			showMsg(msg, function() {
+				if (typeof(func) != "undefined")
+					func();
+			}, timer);
+		},
+		error: function(msg, func) {
+			gener.toast(msg, "error", 1300, func);
+		},
+		success: function(msg, func) {
+			gener.toast(msg, "success", 1300, func);
+		},
+		loading: function(msg, func) {
+			gener.toast(msg, "loadding", 2000, func);
+		},
+		info: function(msg, func) {
+			gener.toast(msg, "info", 1300, func);
+		},
+		/**
+		 * 打开弹出层（不区分大小屏）
+		 */
+		dialog: function(opt) {
+			opt.skin = "";
+			if(opt.adaptive){
+				opt.skin += " layer-ext-adaptive ";
+			}
+			if(opt.transparent){
+				opt.skin += "  layer-ext-transparent ";
+			}
+			openDia(opt);
+		},
+		/**
+		 * 打开自适应的弹出层（手机屏幕自动全屏）
+		 */
+		dialogAda: function(opt) {
+			opt.skin = "layer-ext-adaptive";
+			openDia(opt);
+		},
+		/**
+		 * 弹出自定义内容层
+		 */
+		dialogContent: function(opt) {
+			opt.skin = "";
+			if(opt.adaptive){
+				opt.skin += " layer-ext-adaptive ";
+			}
+			if(opt.transparent){
+				opt.skin += "  layer-ext-transparent ";
+			}
+			openDiaContent(opt);
+		},
+		/**
+		 * 关闭弹出层
+		 */
+		dialogClose: function() {
+			var index = parent.layer.getFrameIndex(window.name);
+			parent.layer.close(index);
+		},
+		/**
+		 * 弹窗后如果是成功操作就回调该方法
+		 */
+		dialogSuc: function(func) {
+			return dialogOkClose(func);
+		},
+		alert: function(content, func) {
+			layer.alert(content, {}, function(index) {
+				if (typeof(func) != "undefined")
+					func();
+				layer.close(index);
+			});
+		},
+		confirm: function(content, yes, no, okVal, cancelVal) {
+			if (typeof(cancelVal) == "undefined" || cancelVal == null || cancelVal == "") {
+				cancelVal = "关闭";
+			}
+			if (typeof(okVal) == "undefined" || okVal == null || okVal == "") {
+				okVal = "确认";
+			}
+			layer.confirm(content, {
+				title: "提示",
+				btn: [okVal, cancelVal], // 按钮
+				icon: 0 // 图标
+			}, function(index) {
+				layer.close(index);
+				return yes.call(this);
+			}, function() {
+				no && no.call(this)
+			});
+		},
+		btnDoing: function(btn, msg) {
+			btn.attr("disabled", "disabled");
+			if (msg != undefined)
+				btn.html(msg);
+			else
+				btn.html('<i class="layerfont icon-spinner icon-spin"></i> 提交中...');
+		},
+		btnDone: function(btn, msg) {
+			btn.removeAttr("disabled");
+			if (msg != undefined)
+				btn.html(msg);
+			else
+				btn.html("确认");
+		},
+		longToDate: function(datelong) {
+			if ((datelong + "").length < 11)
+				datelong = datelong + "000";
+			var d = new Date();
+			d.setTime(datelong);
+			var s = d.format('yyyy-MM-dd HH:mm:ss');
+			return s;
+		},
+		/**
+		 * 末尾字符检测
+		 */
+		endWith: function(str, endStrArr) {
+			for (var i = 0, len = endStrArr.length; i < len; i++) {
+				var tmp = endStrArr[i];
+				if (str.length - tmp.length < 0)
+					return false;
+				if (str.substring(str.length - tmp.length) == tmp) {
+					return true;
+				}
+			}
+			return false;
+		},
+		/**
+		 * 检查url是否为视频地址
+		 */
+		isVideo: function(url) {
+			if (!url)
+				return;
+			var me = this,
+				conUrl = me.convert_url(url);
+			if (me.endWith(conUrl, [".swf", ".flv", ".wmv"])) {
+				return true;
+			}
+			return false;
+		},
+		/**
+		 * 检查是否是手机号码
+		 */
+		isMobile: function(mobile) {
+			var mobileReg = /^((13[0-9])|(14[5-9])|(15[^4])|(170)|(18[0-9]))\d{8}$/;
+			return mobileReg.test(mobile);
+		},
+		/**
+		 * 检查是否为邮箱
+		 */
+		isEmail: function(email) {
+			email = $.trim(email);
+			var p = /^[_\.0-9a-z-]+@([0-9a-z][0-9a-z-]+\.){1,4}[a-z]{2,3}$/i;
+			return p.test(email);
+		},
+		/**
+		 * 数字输入检查
+		 * 调用示例：<input type="text" onkeyup="gener.checkNumber(this,1);" onblur="gener.checkNumber(this,1);" />
+		 */
+		checkNumber: function(obj, type,maxnumber) {
+			if (type == 1) //只能输入数字
+				obj.value = obj.value.replace(/[^\d]/g, "");
+			else if (type == 2) //整数和小数
+				obj.value = obj.value.replace(/[^\d\.]/g, "");
+			else if (type == 3){ //有效的金额		    	
+				var regStrs = [
+					              ['^0(\\d+)$', '$1'], //禁止录入整数部分两位以上，但首位为0
+					              ['[^\\d\\.]+$', ''], //禁止录入任何非数字和点
+					              ['\\.(\\d?)\\.+', '.$1'], //禁止录入两个以上的点
+					              ['^(\\d+\\.\\d{2}).+', '$1'] //禁止录入小数点后两位以上
+				              ];
+				for(i=0; i<regStrs.length; i++){
+					var reg = new RegExp(regStrs[i][0]);
+					obj.value = obj.value.replace(reg, regStrs[i][1]);
+				}
+				obj.value = obj.value.replace(/[^\d\.]/g, "");
+			}
+			else if (type == 4){ //有效的金额小数点后四位		    	
+				var regStrs = [
+					              ['^0(\\d+)$', '$1'], //禁止录入整数部分两位以上，但首位为0
+					              ['[^\\d\\.]+$', ''], //禁止录入任何非数字和点
+					              ['\\.(\\d?)\\.+', '.$1'], //禁止录入两个以上的点
+					              ['^(\\d+\\.\\d{4}).+', '$1'] //禁止录入小数点后四位以上
+				              ];
+				for(i=0; i<regStrs.length; i++){
+					var reg = new RegExp(regStrs[i][0]);
+					obj.value = obj.value.replace(reg, regStrs[i][1]);
+				}
+				obj.value = obj.value.replace(/[^\d\.]/g, "");
+			}else if (type == 5){ //有效的金额小数点后四位		    	
+				var regStrs = [
+					              ['^0(\\d+)$', '$1'], //禁止录入整数部分两位以上，但首位为0
+					              ['[^\\d\\.]+$', ''], //禁止录入任何非数字和点
+					              ['\\.(\\d?)\\.+', '.$1'], //禁止录入两个以上的点
+					              ['^(\\d+\\.\\d{3}).+', '$1'] //禁止录入小数点后三位以上
+				              ];
+				for(i=0; i<regStrs.length; i++){
+					var reg = new RegExp(regStrs[i][0]);
+					obj.value = obj.value.replace(reg, regStrs[i][1]);
+				}
+				obj.value = obj.value.replace(/[^\d\.]/g, "");
+			}
+			if(maxnumber!=null&&Number(obj.value)>maxnumber){
+				obj.value="0";
+			}
+		},
+		toLongDate: function(strDate) {
+			var str_date = strDate.replace(/-/g, "/");
+			return new Date(str_date).getTime() / 1000;
+		},
+		/*上传并裁剪*/
+		uploadCropImg: function(width, height, imgsrc,func) {
+			gener.dialog({
+				url: '/fileupdown/cropimg?width=' + width + '&height=' + height + '&src=' + imgsrc,
+				title: '图片裁剪',
+				width: 750,
+				height: 600,
+				func: function(result) {
+					if(gener.data.cropimg!=undefined){
+						if (typeof(func) != "undefined")
+							func(gener.data.cropimg);
+					}
+				}
+			});
+		},
+		/**
+		 * 上传，合并fineuploader
+		 */
+		uploadImg: function(but, templateId, callbacks) {
+			but.fineUploader({
+				template: templateId,
+				multiple: false,
+				message: error,
+				request: {
+					endpoint: '/fileupdown/ac_uploadimg?isCrop=1'
+				},
+				validation: validation,
+				showMessage: function(message) {
+					if (message.indexOf("extension") > -1)
+						gener.error("格式不正确，请选择合适的格式:jpeg,jpg,png");
+					else
+						gener.error(message);
+				},
+				callbacks: {
+					onSubmit: function(id, fileName) {
+						if (callbacks.onSubmit != undefined) {
+							callbacks.onSubmit(id, fileName);
+						}
+					},
+					onComplete: function(id, fileName, responseJSON) {
+						if (callbacks.onComplete != undefined) {
+							callbacks.onComplete(id, fileName, responseJSON);
+						}
+					},
+					onProgress: function(a, b, c, e) {
+						if (callbacks.onProgress != undefined) {
+							callbacks.onProgress(a, b, c, e);
+						}
+					},
+					onError: function() {
+						if (callbacks.onError != undefined) {
+							callbacks.onError();
+						}
+					}
+				}
+			});
+		},
+		/**
+		 * 上传，合并fineuploader
+		 */
+		uploadFile: function(but, templateId, callbacks) {
+			but.fineUploader({
+				template: templateId,
+				multiple: false,
+				message: error,
+				request: {
+					endpoint: '/fileupdown/ac_uploadfile'
+				},
+				validation: {
+					sizeLimit: 1024000 * 25},
+				showMessage: function(message) {
+					if (message.indexOf("extension") > -1)
+						gener.error("格式不正确，请选择合适的格式:jpeg,jpg,png");
+					else
+						gener.error(message);
+				},
+				callbacks: {
+					onSubmit: function(id, fileName) {
+						if (callbacks.onSubmit != undefined) {
+							callbacks.onSubmit(id, fileName);
+						}
+					},
+					onComplete: function(id, fileName, responseJSON) {
+						if (callbacks.onComplete != undefined) {
+							callbacks.onComplete(id, fileName, responseJSON);
+						}
+					},
+					onProgress: function(a, b, c, e) {
+						if (callbacks.onProgress != undefined) {
+							callbacks.onProgress(a, b, c, e);
+						}
+					},
+					onError: function() {
+						if (callbacks.onError != undefined) {
+							callbacks.onError();
+						}
+					}
+				}
+			});
+		},
+		math_round: function(digit, length) {
+			length = length ? parseInt(length) : 0;
+			if (length <= 0) return Math.round(digit);
+			digit = Math.round(digit * Math.pow(10, length)) / Math.pow(10, length);
+			return digit;
+		}
+	}
+}();
+(function($) {
+	/*
+	 * form 提交 opt:{ button:$("#id"), loading:"提交中...", complete:"确认",
+	 * endpost:funtion(result){ } }
+	 */
+	$.fn.ajaxPost = function(opt) {
+		if (typeof opt == 'function')
+			opt = {
+				btn: null,
+				loading: "提交中...",
+				complete: "确认",
+				endpost: opt,
+				showbefore: true
+			};
+		else if (opt === undefined) {
+			opt = {
+				btn: null,
+				loading: "提交中...",
+				complete: "确认",
+				showbefore: true,
+				endpost: function() {}
+			};
+		} else {
+			opt.complete = opt.btn.val() || opt.btn.text();
+		}
+		if (!opt.loading)
+			opt.loading = "提交中...";
+		this.each(function() {
+			var subopt = {
+				dataType: 'json',
+				beforeSubmit: postBefore,
+				success: postSuccess,
+				error: postError,
+				type: "post"
+			};
+			$(this).ajaxForm(subopt);
+			$(this).submit();
+			return this;
+		});
+
+		function postSuccess(responseData, statusText) {
+			gener.hideMsg();
+			opt.endpost(responseData);
+			if (opt.btn)
+				gener.btnDone(opt.btn, opt.complete);
+		}
+
+		function postBefore() {
+			if (opt.showbefore && opt.showbefore == true)
+				gener.showMsg("数据处理中....", 1);
+			if (opt.btn)
+				gener.btnDoing(opt.btn);
+		}
+
+		function postError() {
+			gener.hideMsg();
+			if (opt.btn)
+				gener.btnDone(opt.btn, opt.complete);
+		}
+	}
+	
+	/**
+	 * 获取url中的参数
+	 * 调用示例：$.getUrlParam("paramName")
+	 */
+	$.getUrlParam = function (name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return decodeURI(r[2]); return null;
+    }
+})(jQuery);
+var validation = {
+	allowedExtensions: ['jpeg', 'jpg', 'png'],
+	sizeLimit: 1024000 * 5,
+	acceptFiles: "image/jpeg,image/png,image/jpeg"
+};
+var error = {
+	typeError: "{file} 格式不正确，请选择合适的格式:{extensions}。",
+	sizeError: "{file} 文件过大，请选择小于{sizeLimit}的文件。"
+}

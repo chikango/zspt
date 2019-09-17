@@ -1,0 +1,625 @@
+
+var materilreturnbuy = function(){
+	
+	var loadreturn = function(){
+		if ($("#grid_return").size() > 0) {
+			$("#grid_return").flexigrid({
+				url : '/MaterialPurchaseReturn/getReturnBuyList',
+				extParam : $("#search-form-grid_return").serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : 20,
+				}, {
+					display : 'returnbuyid',
+					name : 'returnbuyid',
+					hide:true,
+				}, {
+					display : '退货单号',
+					name : 'returnbuyno',
+					width : 60,
+				}, {
+					display : '采购单号',
+					name : 'purchaseno',
+					width : 60,
+				},{
+					display : '退货仓库',
+					name : 'whname',
+					width : 60,
+				},{
+					display : '退货方式',
+					name : 'returnwayshow',
+					width : 60,
+				}, {
+					display : '总金额',
+					name : 'returntotaltrue',
+					width : 60,
+				}, {
+					display : '供应商',
+					name : 'suppliername',
+					width : 60,
+				}, {
+					display : '申请人',
+					name : 'createuser',
+					width : 50,
+				}, {
+					display : '申请时间',
+					name : 'createtime',
+					width : 100,
+				}, {
+					display : '状态',
+					name : 'returnbuystateshow',
+					width : 50,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processDataReturn,
+				checkboxid : "id"
+			});
+		}
+		
+	};
+	
+	function processDataReturn(data) {
+		var curorgtype =$("#curorgtype").val();
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			cell.actions = "";
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd");
+			}
+			
+			if ($.checkAuth("101106", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+				"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/returnDetail?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if(cell.returnbuystate == 0){
+				cell.returnbuystateshow="<span class='badge badge-info'>待审核</span>";
+				
+				if ($.checkAuth("101103", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/returnCheck?returnbuyid="+ cell.returnbuyid + "\");'>" +
+					"<i class='fa fa-check'></i>审核</a>";
+				}
+			}else if(cell.returnbuystate == -1){
+				cell.returnbuystateshow="<span class='badge badge-danger'>退回</span>";
+				if ($.checkAuth("101104", data.authIds)) {
+					if(cell.returnway == 1){
+						cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+						"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/editCheckBack?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 编辑</a>";
+					}else if(cell.returnway == 2){
+						cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+						"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/editreturnmaterial?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 编辑</a>";
+					}
+					
+				}
+			}else if(cell.returnbuystate == 1){
+				cell.returnbuystateshow="<span class='badge badge-success'>已完成</span>";
+			}else if(cell.returnbuystate == 2){
+				cell.returnbuystateshow="<span class='badge badge-primary'>待出库</span>";
+				/*if ($.checkAuth("101108", data.authIds)) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"href='/#/aninoroutstocksure/index?fromcode="+cell.returnbuyno+"'>" +
+					"<i class='fa fa-sign-out'></i> 确认出库</a>";
+				}*/
+			}else if(cell.returnbuystate == 6){
+				cell.returnbuystateshow="<span class='badge badge-warning'>待签收</span>";
+				if ($.checkAuth("101107", data.authIds) && curorgtype!=1) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/returnReceive?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-sign-in'></i> 签收</a>";
+				}
+			}
+			
+		}
+		return data;
+	}
+	
+	var loadhistory = function(){
+		if ($("#grid_history").size() > 0) {
+			$("#grid_history").flexigrid({
+				url : '/MaterialPurchaseReturn/getReturnBuyList',
+				extParam : $("#search-form-grid_history").serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : 20,
+				}, {
+					display : 'returnbuyid',
+					name : 'returnbuyid',
+					hide:true,
+				}, {
+					display : '退货单号',
+					name : 'returnbuyno',
+					width : 60,
+				}, {
+					display : '采购单号',
+					name : 'purchaseno',
+					width : 60,
+				},{
+					display : '退货仓库',
+					name : 'whname',
+					width : 60,
+				},{
+					display : '退货方式',
+					name : 'returnwayshow',
+					width : 60,
+				}, {
+					display : '总金额',
+					name : 'returntotaltrue',
+					width : 60,
+				}, {
+					display : '供应商',
+					name : 'suppliername',
+					width : 60,
+				}, {
+					display : '申请人',
+					name : 'createuser',
+					width : 50,
+				}, {
+					display : '申请时间',
+					name : 'createtime',
+					width : 100,
+				}, {
+					display : '状态',
+					name : 'returnbuystateshow',
+					width : 50,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processDataHistory,
+				checkboxid : "id"
+			});
+		}
+		
+	};
+	
+	function processDataHistory(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			cell.actions = "";
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd");
+			}
+			if ($.checkAuth("101106", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+				"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/returnDetail?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if(cell.returnbuystate == 0){
+				cell.returnbuystateshow="<span class='badge badge-info'>待审核</span>";
+			}else if(cell.returnbuystate == -1){
+				cell.returnbuystateshow="<span class='badge badge-danger'>退回</span>";
+			}else if(cell.returnbuystate == 1){
+				cell.returnbuystateshow="<span class='badge badge-success'>已完成</span>";
+			}
+			
+		}
+		return data;
+	}
+	
+	var searchreturn = function(pageIndex) {
+		$.searchFlexgrid($('#grid_return'), pageIndex);
+	};
+	var searchhistory = function(pageIndex) {
+		$.searchFlexgrid($('#grid_history'), pageIndex);
+	};
+	
+	return{
+		initdata:function(){
+			loadreturn();
+		},
+		inithistory:function(){
+			loadhistory();
+		},
+		searchReturn:function(index){
+			searchreturn(index);
+		},
+		searchHistory:function(index){
+			searchhistory(index);
+		},
+		
+		/**
+		 * 选择采购单
+		 * @returns
+		 */
+		init_purchase:function(){
+			$("#purchaseno").bsSuggest({
+				url : "/MaterialPurchaseReturn/getPurchaseList",
+				effectiveFields : [ "purchaseno" ],
+				idField : "id",
+				keyField : "purchaseno",
+				showBtn : false,
+			}).on("onSetSelectValue", function(e, row) {
+				var id = $("#purchaseno").attr("data-id");
+				//获取采购单状态
+				//var purchasestate = row.state;
+				
+				$("#linkbuyid").val(id);//采购单id
+				$("#supplyid").val(row.supplid);
+				$("#supplyname").val(row.suppliername);
+				materilreturnbuy.init_purchaseWhstock(id);//仓库初始化
+				materilreturnbuy.init_purchasedetail(id);//物料初始化
+				
+				/*if(purchasestate == 2 || purchasestate == 3){
+					
+				}else{
+					$("#linkbuyid").val("");//采购单id
+					$("#supplyname").val("");
+					$("#detaillist").html("");
+					gener.tip("该采购单未签收，无法退货！");
+					return;
+				}*/
+				
+			});
+		},
+		
+		init_purchaseWhstock:function(buyid){
+			gener.ajaxPost("/MaterialPurchaseReturn/getPurchaseStock",{"buyid" : buyid} ,function(data){
+				if(data!=null && data.length > 0){
+					var optionHtml = "";
+					for(var i = 0; i < data.length ; i++){
+						var obj = data[i];
+						optionHtml +="<option value='"+obj.whid+"'>"+obj.whname+"</option>"
+					}
+					var whnameHtml ="<select id='whid' name='info.whid' class='selectpicker form-control' style='width:100%;'>"+optionHtml+"</select>";
+					$("#selectWhname").html("");
+					$("#selectWhname").append(whnameHtml);
+				}
+			});
+		},
+		
+		/**
+		 * 采购单明细
+		 * @returns
+		 */
+		init_purchasedetail:function(buyid){
+			gener.ajaxPost("/MaterialPurchaseReturn/getPurchaseDetail",{"buyid" : buyid} ,function(data){
+				if(data!=null && data.length > 0){
+					var materialHtml = "";
+					for(var i = 0; i < data.length ; i++){
+						var readonly ="";
+						var obj = data[i];
+						if(obj.materialtype == 1){//非赠品才能退货
+							var thisreturnprice = 0;
+							if(obj.canreturnamount == 0){
+								readonly = "readonly='readonly'";
+							}
+							materialHtml +="<tr>" 
+										 + "<td>"+(i+1)+"</td>" 
+										 + "<td>"+obj.materialcode+"" 
+										 + "<input type='hidden' name='returninfo.returnmaterial' value='"+obj.materialcode+"' /></td>" 
+										 + "<td>"+obj.materialname+"</td>" 
+										 + "<td>"+obj.groupname+"</td>" 
+										 + "<td>采购" 
+										 + "<input type='hidden'readonly='readonly' class='form-control' name='returninfo.materialtype'value='"+obj.materialtype+"'/>" 
+										 + "</td>" 
+										 + "<td><input type='text'readonly='readonly' class='form-control' name='returninfo.buypricetrue'value='"+obj.buypricetrue+"'/></td>" 
+										 + "<td><input type='text'readonly='readonly' class='form-control' name='returninfo.buyamount'value='"+obj.buyamount+"'/></td>" 
+										/* + "<td>"+obj.historynum+"</td>" */
+										 + "<td><input type='text'readonly='readonly' class='form-control' name='returninfo.signamount'value='"+obj.signamount+"'/></td>" 
+										 + "<td><input type='text'readonly='readonly' class='form-control' name='returninfo.canreturnamount'value='"+obj.canreturnamount+"'/></td>" 
+										 + "<td>" 
+										 + "<input type='text' class='form-control' name='returninfo.returnamount'"+readonly+" " +
+										 		"onblur='gener.checkNumber(this,1);changeprice();'/>" 
+										 + "</td>" 
+										 + "<td><span>"+thisreturnprice+
+										 	"</span><input type='hidden' name='returninfo.buytotalpricetrue'value='"+thisreturnprice+"'/></td>"
+										 + "</tr>";
+						}
+					}
+					$("#detaillist").html("");
+					$("#detaillist").append(materialHtml);
+					
+				}
+			});
+		},
+
+		submit_returnCheck:function(){
+			if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写审核意见", $("#suggestion"));
+				return;
+		    }
+			var approve = $("#form1").serializeJson();
+			gener.ajaxPost("/MaterialPurchaseReturn/sub_returnCheck",{"approve":approve},function(result){
+				if(result.state>0){
+					gener.success(result.msg, function() {
+						$(".btn-close").click();
+						// 刷新列表数据
+						$("#grid_return").flexReload();
+						$("#grid_history").flexReload();
+					});
+				}else{
+					gener.error(result.msg);
+				}
+			});
+		},
+		
+		/**
+		 * 退货提交
+		 * @returns
+		 */
+		submit_buyReturn:function(){
+			if ($("#addform").valid()) {
+				var linklist = new Array();
+				var canSubmit = false;//判断是否可以退货
+				var iscansave=true;
+				$("#detaillist").find("tr").each(function() {
+					var returnamountobj = $(this).find("input[name='returninfo.returnamount']");
+					var returnamount = $(this).find("input[name='returninfo.returnamount']").val();// 退货数量
+					var canreturn =  $(this).find("input[name='returninfo.canreturnamount']").val();//可退货数量
+					if(canreturn!=null && canreturn.length > 0 && parseInt(canreturn) > 0){//有可退货数量情况下才可以退货
+						canSubmit = true;//有可退货物料
+						if(returnamount!=null && returnamount.length >0){
+							 if(!Common.IsIntThanZero(returnamount)){
+								 gener.tip("退货数量需为大于0的整数",$(returnamountobj));
+								 iscansave=false;
+								 return false;
+							 }else if(parseInt(returnamount) > parseInt(canreturn)){
+								 gener.tip("退货数量不能大于可退货数量",$(returnamountobj));
+								 iscansave=false;
+								 return false;
+							 }
+						}
+					}
+					
+					var obj = {
+						"returnmaterial" : $(this).find("[name='returninfo.returnmaterial']").val(),
+						"buypricetrue":$(this).find("[name='returninfo.buypricetrue']").val(),
+						"buytotalpricetrue":$(this).find("[name='returninfo.buytotalpricetrue']").val(),
+						"returnamount" : returnamount,
+						"materialtype":$(this).find("[name='returninfo.materialtype']").val(),
+					};
+					linklist.push(obj);
+				});
+				if(iscansave){
+					if(canSubmit){//有可退货物料的情况下，判断是否至少选择了一个可退货的物料输入了退货数量
+						var issubmit = false;
+						$("#detaillist").find("tr").each(function() {//判断至少一个可退货物料输入了退货数量
+							var returnamount = $(this).find("input[name='returninfo.returnamount']").val();// 退货数量
+							if(returnamount!=null && returnamount.length>0 && parseInt(returnamount) > 0){
+								issubmit = true;
+							}	
+						});
+						if(issubmit){
+							gener.confirm("您确认退货？", function() {
+								var info = $("#addform").serializeJson();
+								info["info.linklist"]=linklist;
+								gener.ajaxPost("/MaterialPurchaseReturn/ac_saveReturnInfo",info, function(result) {
+									if (result.state == 1) {
+										gener.success(result.msg, function() {
+											$(".btn-close").click();
+											// 刷新列表数据
+											$("#grid_return").flexReload();
+											$("#grid_history").flexReload();
+										});
+									} else {
+										if(result.msg!=null){
+											gener.alert(result.msg);
+										}else{
+											gener.alert("处理失败");
+										}
+										
+									}
+								});
+							});
+						}else{
+							gener.tip("提交失败！至少选择一个物料进行退货");
+							return;
+						}
+					}else{
+						gener.tip("提交失败！该采购单无可退货物料！");
+						return;
+					}
+				}
+				
+			}
+		},
+		
+		submit_returnMaterial:function(){
+			debugger
+			var supplid = $("#supplyid").val();
+			if (typeof (supplid) == "undefined" || supplid == "") {
+				gener.tip("请选择供应商！");
+				return;
+			}
+			var whid = $("#whid").val();
+			if (typeof (whid) == "undefined" || whid == "") {
+				gener.tip("请选择出库仓库！");
+				return;
+			}
+			var results = 1;
+			var linklist = new Array();
+			$("#detaillist").find("tr").each(function() {
+				debugger
+				var repairamountobj = $(this).find("input[name='info.repairamount']");
+				var repairamountvalue = $.trim($(repairamountobj).val());
+				var repairpricetrueobj = $(this).find("input[name='info.repairpricetrue']");
+				var canamountobj = $(this).find("input[name='info.amount']");
+				var canamount = $.trim($(canamountobj).val());; 
+				var repairpricetruevalue = $.trim($(repairpricetrueobj).val());
+				if (repairpricetruevalue.length == 0) {
+					gener.tip("请输入物料单价", $(repairpricetrueobj));
+					results = 0;
+					return false;
+				}
+				if(Number(repairpricetruevalue) == 0){
+					gener.tip("请物料单价不能为0", $(repairpricetrueobj));
+					results = 0;
+					return false;
+				}
+				if (!Common.isDefaultFloat(repairpricetruevalue)) {
+					gener.tip("物料单价需为不大于2位小数的数值", $(repairpricetrueobj));
+					results = 0;
+					return false;
+				}
+				if (repairamountvalue.length == 0) {
+					gener.tip("请输入退货数量", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				if (!Common.IsIntThanZero(repairamountvalue)) {
+					gener.tip("退货数量需为正整数", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				if (Number(repairamountvalue)>Number(canamount)) {
+					gener.tip("退货数量不能大于可出库数量", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				var obj = {
+					"returnmaterial" : $(this).find("[name='info.materialcode']").val(),
+					"buypricetrue" :  repairpricetruevalue,
+					"buytotalpricetrue" : $(this).find("[name='info.totalprocurement']").val(),
+					"returnamount":repairamountvalue,
+				};
+				linklist.push(obj);
+				
+			});
+			if (results == 0) {
+				return;
+			}
+			if (linklist.length == 0) {
+				gener.tip("请添加要退货的物料！");
+				return;
+			}
+			if ($("#addform").valid()) {
+				gener.confirm("您确认退货？", function() {
+					var info = $("#addform").serializeJson();
+					info["info.linklist"]=linklist;
+					gener.ajaxPost("/MaterialPurchaseReturn/ac_saveReturnInfo",info, function(result) {
+						if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+								// 刷新列表数据
+								$("#grid_return").flexReload();
+								$("#grid_history").flexReload();
+							});
+						} else {
+							if(result.msg!=null){
+								gener.alert(result.msg);
+							}else{
+								gener.alert("处理失败");
+							}
+							
+						}
+					});
+				});
+				
+			}
+			
+		},
+		
+		
+		//内部交易添加详情弹窗
+		returnDetailDialog:function(returnbuyid){
+			gener.dialog({
+				url : '/MaterialPurchaseReturn/returnDetailDialog?returnbuyid='+returnbuyid,
+				title : '安能退货详情',
+				width : "90%",
+				height : "90%",
+			});
+		},
+		
+		suplierreceive:function(returnbuyid){
+			gener.confirm("您确认签收？", function() {
+				gener.ajaxPost("/MaterialPurchaseReturn/ac_suplierReceive",{"returnbuyid":returnbuyid},function(result){
+					if(result.state>0){
+						gener.success(result.msg, function() {
+							$(".btn-close").click();
+							// 刷新列表数据
+							$("#grid_return").flexReload();
+							$("#grid_history").flexReload();
+						});
+					}else{
+						gener.error(result.msg);
+					}
+				});
+			});
+		},
+		
+		returnDetailpop :function(id){
+            gener.dialog({
+                url : "/MaterialPurchaseReturn/returnDetailpop?returnbuyid="+id,
+                title : "移库详情",
+                width : "80%",
+                height : "90%",
+                func : function() {
+                }
+            });
+        },
+		
+		
+	}
+	
+}();
+
+function changeprice(){
+	var total = 0;
+	$("#detaillist tr").each(function(i) {
+		var temp = $(this).find("td").eq(0).html() - 1;// 数组标识
+		var returnamount = $(this).find("input[name='returninfo.returnamount']").val();// 退货数量
+		var buyprice = $(this).find("input[name='returninfo.buypricetrue']").val();//采购价格
+		if (typeof (buyprice) == "undefined") {
+			buyprice = 0.000;
+		}
+		var totalprice = buyprice*1000*returnamount/1000;//总价
+		var money = parseFloat(totalprice.toFixed(3));//总价（保留两位小数）
+		if (money) {
+			total += money;//退货金额
+		}
+		var totalpriceobj = $(this).find("input[name='returninfo.buytotalpricetrue']");
+		if (totalpriceobj != null) {
+			money = money.toFixed(3);
+			$(totalpriceobj).val(money);
+			$(totalpriceobj).prev().html(money);
+		}
+	});
+	$("#returntotal").val(Number(total).toFixed(3));
+	
+}
+
+
+
+

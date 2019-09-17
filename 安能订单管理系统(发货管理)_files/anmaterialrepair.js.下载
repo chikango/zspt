@@ -1,0 +1,765 @@
+var checkeds = new Array();
+var anmaterialrepair = function(){
+	
+	
+	var loadreturn = function(){
+		if ($("#grid_return").size() > 0) {
+			$("#grid_return").flexigrid({
+				url : '/MaterialPurchaseReturn/getRepairBuyList',
+				extParam : $("#search-form-grid_return").serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : 20,
+				}, {
+					display : 'returnbuyid',
+					name : 'returnbuyid',
+					hide:true,
+				}, {
+					display : '返修单号',
+					name : 'returnbuyno',
+					width : 60,
+				},{
+					display : '仓库',
+					name : 'whname',
+					width : 60,
+				}/*,  {
+					display : '总金额',
+					name : 'returntotaltrue',
+					width : 60,
+				}*/, {
+					display : '供应商',
+					name : 'suppliername',
+					width : 60,
+				}, {
+					display : '申请人',
+					name : 'createuser',
+					width : 50,
+				}, {
+					display : '申请时间',
+					name : 'createtime',
+					width : 100,
+				}, {
+					display : '状态',
+					name : 'returnbuystateshows',
+					width : 50,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processDataReturn,
+				checkboxid : "id"
+			});
+		}
+		
+	};
+	
+	function processDataReturn(data) {
+		var curorgtype =$("#curorgtype").val();
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			cell.actions = "";
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			
+			if ($.checkAuth("101206", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+				"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/repairdetail?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if(cell.returnbuystate == 0){
+				//cell.returnbuystateshow="<span class='badge badge-info'>待审核</span>";
+				
+				if ($.checkAuth("101203", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/repairCheck?returnbuyid="+ cell.returnbuyid + "\");'>" +
+					"<i class='fa fa-check'></i>审核</a>";
+				}
+			}else if(cell.returnbuystate == -1){
+				//cell.returnbuystateshow="<span class='badge badge-danger'>退回</span>";
+				if ($.checkAuth("101204", data.authIds)) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/editRepairCheck?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-edit'></i> 编辑</a>";
+				}
+			}else if(cell.returnbuystate == 1){
+				//cell.returnbuystateshow="<span class='badge badge-success'>已完成</span>";
+			}else if(cell.returnbuystate == 3 || cell.returnbuystate == 4 || cell.returnbuystate == 5){
+				if ($.checkAuth("101207", data.authIds) && curorgtype!=1) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/repairInstore?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-send'></i> 发货</a>";
+				}
+				
+				/*if(cell.returnbuystate == 4 || cell.returnbuystate == 5){
+					if (cell.needsure!=null && cell.needsure >0 && curorgtype ==1 && $.checkAuth("101211", data.authIds)) {
+						cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+						"href='/#/aninoroutstocksure/index?fromcode="+cell.returnbuyno+"'>" +
+						"<i class='fa fa-sign-in'></i> 签收确认</a>";
+					}
+				}*/
+				
+			}else if(cell.returnbuystate == 6){
+				if ($.checkAuth("101210", data.authIds)  && curorgtype!=1) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/supplierReceive?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-sign-in'></i> 签收</a>";
+				}
+			}else if(cell.returnbuystate == 2){
+				/*if ($.checkAuth("101212", data.authIds)) {
+					cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+					"href='/#/aninoroutstocksure/index?fromcode="+cell.returnbuyno+"'>" +
+					"<i class='fa fa-sign-out'></i> 出库确认</a>";
+				}*/
+			}
+			
+		}
+		return data;
+	}
+	
+	var loadhistory = function(){
+		if ($("#grid_history").size() > 0) {
+			$("#grid_history").flexigrid({
+				url : '/MaterialPurchaseReturn/getRepairBuyList',
+				extParam : $("#search-form-grid_history").serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : 20,
+				}, {
+					display : 'returnbuyid',
+					name : 'returnbuyid',
+					hide:true,
+				}, {
+					display : '返修单号',
+					name : 'returnbuyno',
+					width : 60,
+				},{
+					display : '仓库',
+					name : 'whname',
+					width : 60,
+				}/*, {
+					display : '总金额',
+					name : 'returntotaltrue',
+					width : 60,
+				}*/, {
+					display : '供应商',
+					name : 'suppliername',
+					width : 60,
+				}, {
+					display : '申请人',
+					name : 'createuser',
+					width : 50,
+				}, {
+					display : '申请时间',
+					name : 'createtime',
+					width : 100,
+				}, {
+					display : '状态',
+					name : 'returnbuystateshows',
+					width : 50,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processDataHistory,
+				checkboxid : "id"
+			});
+		}
+		
+	};
+	
+	function processDataHistory(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			cell.actions = "";
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			if ($.checkAuth("101206", data.authIds)) {
+				cell.actions += "<a class='btn btn-xs btn-success btn-outline'  " +
+				"onclick='ajaxHtml(this,\"/MaterialPurchaseReturn/repairdetail?returnbuyid="+ cell.returnbuyid + "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			/*if(cell.returnbuystate == 0){
+				cell.returnbuystateshow="<span class='badge badge-info'>待审核</span>";
+			}else if(cell.returnbuystate == -1){
+				cell.returnbuystateshow="<span class='badge badge-danger'>退回</span>";
+			}else if(cell.returnbuystate == 1){
+				cell.returnbuystateshow="<span class='badge badge-success'>已完成</span>";
+			}*/
+			
+		}
+		return data;
+	}
+	
+	var searchreturn = function(pageIndex) {
+		$.searchFlexgrid($('#grid_return'), pageIndex);
+	};
+	var searchhistory = function(pageIndex) {
+		$.searchFlexgrid($('#grid_history'), pageIndex);
+	};
+	
+	var loadMaterial = function(){
+		if ($("#grid_materials").size() > 0) {
+			$("#grid_materials").flexigrid({
+				url : '/MaterialPurchaseReturn/searchmaterials',
+				extParam : {
+					"info.supplierid" : $("#supplyid").val(),
+					"info.whid" : $("#whid").val(),
+				},
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : '30',
+				}, {
+					display : 'id',
+					name : 'id',
+					hide : true,
+				}, {
+					display : '物料编码',
+					name : 'materialcode',
+					width : 40,
+				}, {
+					display : '物料名称',
+					name : 'materialname',
+					width : 100,
+				},{
+					display : '物料单价',
+					name : 'purchasepricetrue',
+					width : 40,
+				},{
+					display : '可出库数量',
+					name : 'amount',
+					width : 50,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 30,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "materialid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 10,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processData_material,
+				onSuccess : clickcheckbox,
+			});
+		}
+	}
+	function processData_material(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			// 是否已选
+			if (typeof (cell.id) == "undefined") {
+				// 是否已选
+				var ischecked = "";
+				for (var j = 0; j < checkeds.length; j++) {
+					if (checkeds[j].materialcode == cell.materialcode) {
+						ischecked = "checked";
+						break; // 终止循环
+					}
+				}
+				cell.actions = "<input type='checkbox' onclick='anmaterialrepair.checkOne(this);' "+ ischecked + "/>";
+			} else {
+				cell.actions = "<input type='checkbox' onclick='anmaterialrepair.checkOne(this);' "+ ischecked + "/>";
+			}
+		}
+		return data;
+	};
+	function clickcheckbox() {
+		$("tr:not(':first')").click(function(e) {
+		
+			var check = $(this).find("input[type='checkbox']");
+			if (check) {
+				var flag = check[0].checked;
+				if (flag) {
+					check[0].checked = false;
+				} else {
+					check[0].checked = true;
+				}
+				anmaterialrepair.checkOne(check.get(0));
+			}
+		});
+		$("input[type='checkbox']").click(function(e) {
+			e.stopPropagation();
+		});
+	}
+	;
+	return{
+		
+		initdata:function(){
+			loadreturn();
+		},
+		inithistory:function(){
+			loadhistory();
+		},
+		searchReturn:function(index){
+			searchreturn(index);
+		},
+		searchHistory:function(index){
+			searchhistory(index);
+		},
+		
+		init_materialList:function(){
+			loadMaterial();
+		},
+		
+		init_organization : function() {
+			$("#supplyname").bsSuggest({
+				url : "/SplitBill/getSupplier",
+				effectiveFields : [ "showname" ],
+				idField : "id",
+				keyField : "showname",
+				showBtn : false,
+			}).on("onSetSelectValue", function(e, row) {
+				var id = $("#supplyname").attr("data-id");
+				$("#supplyid").val(id);
+			});
+		},
+		
+		addRepairMaterial:function(type){
+			var supplid = $("#supplyid").val();
+			if (typeof (supplid) == "undefined" || supplid == "") {
+				gener.tip("请选择供应商！");
+				return;
+			}
+			var whid = $("#whid").val();
+			if (typeof (whid) == "undefined" || whid == "") {
+				gener.tip("请选择出库仓库！");
+				return;
+			}
+			gener.dialog({
+				url : "/MaterialPurchaseReturn/addRepairMateriel?info.supplyid="+ supplid+"&info.whid="+whid+"&info.returntype="+type,
+				title : "新增物料",
+				width : "70%",
+				height : "80%",
+				func : function() {
+				}
+			});
+			
+		},
+		
+		submit_materials:function(type){
+			if (checkeds.length == 0) {
+				gener.tip("请勾选物料！");
+				return;
+			}
+			var html = "";
+			var table = parent.$("#grid_parent");
+			var seq = table[0].rows.length;
+			if(type==1){
+				$(checkeds).each(function() {
+					var existcount = 0;
+					if (table.find("input[name='info.materialcode'][value='"+ this.materialcode + "']").length > 0) {
+						existcount++;
+					}else{
+						html += "<tr>" 
+							 +  "<td name='seq'>"+ seq+ "</td>"
+							 + "<td>"+ this.materialcode+ "</td>"
+							 + "<td>"+ this.materialname+ "</td>"
+							 + "<td>"+ this.amount+ "</td>"
+							 + "<td><input type='text' class='form-control' name='info.repairpricetrue' onkeyup='gener.checkNumber(this,5);' value='"
+							 + this.purchasepricetrue
+							 + "'onblur='anmaterialrepair.checkpriceinput(this,1);gener.checkNumber(this,5);changeprice2();'/></td>"
+							 + "<td><input type='text' class='form-control' name='info.repairamount'"
+							 + "onblur='gener.checkNumber(this,1);changeprice2();'/></td>"
+							 + "<td>"
+							 + "<span>"+ this.totalprocurement+ "</span>"
+							 + "<input type='hidden' name='info.totalprocurement' value='"+ this.totalprocurement+ "'/></td>"
+							 + "<td><a onclick='rowDel(this);changeprice2();' class='btn btn-xs btn-success btn-outline' style='margin-bottom:0;'><i class='fa fa-trash-o'></i> 删除</a>" +
+							 	"<input type='hidden' name='info.materialcode' value='"+ this.materialcode + "'>"+
+							 	"<input type='hidden' name='info.amount' value='"+ this.amount + "'>"
+							 + "</td>"
+							 + "</tr>";
+						seq++;
+					}
+				});
+			}else if(type==2){
+				$(checkeds).each(function() {
+					var existcount = 0;
+					if (table.find("input[name='info.materialcode'][value='"+ this.materialcode + "']").length > 0) {
+						existcount++;
+					}else{
+						html += "<tr>" 
+							 +  "<td name='seq'>"+ seq+ "</td>"
+							 + "<td>"+ this.materialcode+ "</td>"
+							 + "<td>"+ this.materialname+ "</td>"
+							 + "<td>"+ this.amount+ "</td>"
+							 /*+ "<td><input type='text' class='form-control' name='info.repairpricetrue' onkeyup='gener.checkNumber(this,5);' value='"
+							 + this.purchasepricetrue
+							 + "'onblur='anmaterialrepair.checkpriceinput(this,1);gener.checkNumber(this,5);'/></td>"*/
+							 + "<td><input type='text' class='form-control' name='info.repairamount'"
+							 + "onblur='gener.checkNumber(this,1);'/></td>"
+							 /*+ "<td>"
+							 + "<span>"+ this.totalprocurement+ "</span>"
+							 + "<input type='hidden' name='info.totalprocurement' value='"+ this.totalprocurement+ "'/></td>"*/
+							 + "<td><a onclick='rowDel(this);' class='btn btn-xs btn-success btn-outline' style='margin-bottom:0;'><i class='fa fa-trash-o'></i> 删除</a>" +
+							 	"<input type='hidden' name='info.materialcode' value='"+ this.materialcode + "'>"+
+							 	"<input type='hidden' name='info.amount' value='"+ this.amount + "'>"
+							 + "</td>"
+							 + "</tr>";
+						seq++;
+					}
+				});
+			}
+			table.append(html);
+			gener.dialogClose();
+		},
+		
+		checkpriceinput : function(obj, type) {
+			var value = $(obj).val();
+			/*if (value == null || value.length == 0) {
+				gener.tip("请输入物料单价", $(obj));
+				return;
+			}*/
+			value = $.trim(value);
+			if (!Common.isDefaultFloat(value)) {
+				gener.tip("物料单价需为不大于三位小数的数值", $(obj));
+				return;
+			}
+			changeprice2();
+		},
+		checkOne : function(obj) {
+			// 维护已选数组
+			var currow = $(obj).closest("tr");
+			if ($(obj).prop("checked")) {// 勾选则插入
+				var obj = new Object();
+				obj.id = currow.find("td").eq(1).text();
+				obj.materialcode = currow.find("td").eq(2).text();
+				obj.materialname = currow.find("td").eq(3).text();
+				obj.purchasepricetrue = currow.find("td").eq(4).text();
+				obj.amount = currow.find("td").eq(5).text();
+				obj.totalprocurement = 0;
+				checkeds.push(obj);
+			} else {// 取消勾选则删除
+				for (var i = 0; i < checkeds.length; i++) {
+					if (checkeds[i].materialcode == currow.find("td").eq(2).text()) {
+						checkeds.splice(i, 1);
+						break; // 终止循环
+					}
+				}
+			}
+		},
+		
+		submit_repair:function(){
+			var whid = $("#towhid").val();
+			if (typeof (whid) == "undefined" || whid == "") {
+				gener.tip("请选择入库仓库！",$("#towhid"));
+				return;
+			}
+			var results = 1;
+			var linklist = new Array();
+			$("#detaillist").find("tr").each(function() {
+				/*var repairinstoreobj = $(this).find("input[name='info.instorenum']");//已入库数量
+				var repairinstoreval = $.trim($(repairinstoreobj).val());
+				var repairamountobj = $(this).find("input[name='info.repairamount']");//返修数量
+				var repairamount = $.trim($(repairamountobj).val());*/
+				var waitamountobj = $(this).find("input[name='info.waitinstorenum']");//待入库数量
+				var waitamount = $.trim($(waitamountobj).val());
+				var thisamountobj = $(this).find("input[name='info.thisinstore']");//本次入库数量
+				var thisamount = $.trim($(thisamountobj).val());
+				
+				var caninstoreobj = $(this).find("input[name='info.caninstorenum']");//可入库数量
+				var caninstorenum = $.trim($(caninstoreobj).val());
+				//本次入库数量不能大于未入库数
+				//if (thisamount.length == 0) {
+					//gener.tip("请输入入库数量", $(thisamountobj));
+					//results = 0;
+					//return false;
+					//thisamount = 0;
+				//}
+				/*if (!Common.IsIntThanZero(thisamount)) {
+					gener.tip("入库数量需为正整数", $(thisamountobj));
+					results = 0;
+					return false;
+				}*/
+				if (Number(thisamount)>Number(caninstorenum)) {
+					gener.tip("入库数量不能大于可入库数量", $(thisamountobj));
+					results = 0;
+					return false;
+				}
+				if(thisamount.length != 0){
+					var obj = {
+						"returnmaterial" : $(this).find("[name='info.returnmaterial']").val(),
+						"thisinstore":thisamount,
+					};
+					linklist.push(obj);
+				}
+				
+			});
+			if (results == 0) {
+				return;
+			}
+			if (linklist.length == 0) {
+				gener.tip("至少添加一种物料！");
+				return;
+			}
+			gener.confirm("您确认提交？", function() {
+				debugger
+				var info = $("#addform").serializeJson();
+				info["info.linklist"]=linklist;
+				gener.ajaxPost("/MaterialPurchaseReturn/ac_saveRepairInstore",info, function(result) {
+					if (result.state == 1) {
+						gener.success(result.msg, function() {
+							$(".btn-close").click();
+							// 刷新列表数据
+							$("#grid_return").flexReload();
+							$("#grid_history").flexReload();
+						});
+					} else {
+						if(result.msg!=null){
+							gener.alert(result.msg);
+						}else{
+							gener.alert("处理失败");
+						}
+						
+					}
+				});
+			});
+		},
+		
+		
+		submit_addfrom:function(){
+			var supplid = $("#supplyid").val();
+			if (typeof (supplid) == "undefined" || supplid == "") {
+				gener.tip("请选择供应商！");
+				return;
+			}
+			var whid = $("#whid").val();
+			if (typeof (whid) == "undefined" || whid == "") {
+				gener.tip("请选择出库仓库！");
+				return;
+			}
+			var results = 1;
+			var linklist = new Array();
+			$("#detaillist").find("tr").each(function() {
+				debugger
+				var repairamountobj = $(this).find("input[name='info.repairamount']");
+				var repairamountvalue = $.trim($(repairamountobj).val());
+				//var repairpricetrueobj = $(this).find("input[name='info.repairpricetrue']");
+				var canamountobj = $(this).find("input[name='info.amount']");
+				var canamount = $.trim($(canamountobj).val());; 
+				//var repairpricetruevalue = $.trim($(repairpricetrueobj).val());
+				/*if (repairpricetruevalue.length == 0) {
+					gener.tip("请输入物料单价", $(repairpricetrueobj));
+					results = 0;
+					return false;
+				}*/
+				/*if (!Common.isDefaultFloat(repairpricetruevalue)) {
+					gener.tip("物料单价需为不大于2位小数的数值", $(repairpricetrueobj));
+					results = 0;
+					return false;
+				}*/
+				if (repairamountvalue.length == 0) {
+					gener.tip("请输入返修数量", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				if (!Common.IsIntThanZero(repairamountvalue)) {
+					gener.tip("返修数量需为正整数", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				if (Number(repairamountvalue)>Number(canamount)) {
+					gener.tip("返修数量不能大于可出库数量", $(repairamountobj));
+					results = 0;
+					return false;
+				}
+				var obj = {
+					"returnmaterial" : $(this).find("[name='info.materialcode']").val(),
+					//"buypricetrue" :  repairpricetruevalue,
+					//"buytotalpricetrue" : $(this).find("[name='info.totalprocurement']").val(),
+					"returnamount":repairamountvalue,
+				};
+				linklist.push(obj);
+				
+			});
+			if (results == 0) {
+				return;
+			}
+			if (linklist.length == 0) {
+				gener.tip("请添加要返修的物料！");
+				return;
+			}
+			if ($("#addform").valid()) {
+				gener.confirm("您确认返修？", function() {
+					var info = $("#addform").serializeJson();
+					info["info.linklist"]=linklist;
+					gener.ajaxPost("/MaterialPurchaseReturn/ac_saveRepairInfo",info, function(result) {
+						if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+								// 刷新列表数据
+								$("#grid_return").flexReload();
+								$("#grid_history").flexReload();
+							});
+						} else {
+							if(result.msg!=null){
+								gener.alert(result.msg);
+							}else{
+								gener.alert("处理失败");
+							}
+							
+						}
+					});
+				});
+				
+			}
+			
+		},
+		
+		submit_repairCheck:function(){
+			if ($.trim($("#suggestion").val()) == "") {
+				gener.tip("请填写审核意见");
+				return;
+		    }
+			var approve = $("#form1").serializeJson();
+			gener.ajaxPost("/MaterialPurchaseReturn/sub_repairCheck",{"approve":approve},function(result){
+				if(result.state>0){
+					gener.success(result.msg, function() {
+						$(".btn-close").click();
+						// 刷新列表数据
+						$("#grid_return").flexReload();
+						$("#grid_history").flexReload();
+					});
+				}else{
+					gener.error(result.msg);
+				}
+			});
+		},
+		
+		suplierreceive:function(returnbuyid){
+			gener.confirm("您确认签收？", function() {
+				gener.ajaxPost("/MaterialPurchaseReturn/ac_suplierReceive",{"returnbuyid":returnbuyid},function(result){
+					if(result.state>0){
+						gener.success(result.msg, function() {
+							$(".btn-close").click();
+							// 刷新列表数据
+							$("#grid_return").flexReload();
+							$("#grid_history").flexReload();
+						});
+					}else{
+						gener.error(result.msg);
+					}
+				});
+			});
+		},
+		
+		outstoredetail:function(id){
+			gener.dialog({
+				url : "/MaterialPurchaseReturn/outStroreDetail?id="+ id,
+				title : "出库详情",
+				width : "60%",
+				height : "50%",
+				func : function() {
+				}
+			});
+			
+		},
+		instoredetail:function(id){
+			gener.dialog({
+				url : "/MaterialPurchaseReturn/inStroreDetail?id="+ id,
+				title : "入库详情",
+				width : "60%",
+				height : "50%",
+				func : function() {
+				}
+			});
+			
+		},
+		
+		repairdetailpop :function(id){
+            gener.dialog({
+                url : "/MaterialPurchaseReturn/repairdetailpop?returnbuyid="+id,
+                title : "移库详情",
+                width : "80%",
+                height : "90%",
+                func : function() {
+                }
+            });
+        },
+		
+		
+	}
+
+}();
+
+function changeprice2() {
+	debugger
+	var total = 0;
+	$("#detaillist tr").each(function(i) {
+		var temp = $(this).find("td").eq(0).html() - 1;// 数组标识
+		var repairamount = $(this).find("input[name='info.repairamount']").val();// 返修数量
+		var repairpricetrue = $(this).find("input[name='info.repairpricetrue']").val();//返修价格
+		if (typeof (repairpricetrue) == "undefined") {
+			repairpricetrue = 0.000;
+		}
+		var totalprice = repairpricetrue*1000*repairamount/1000;//总价
+		var money = parseFloat(totalprice.toFixed(3));//总价（保留两位小数）
+		if (money) {
+			total += money;//退货金额
+		}
+		var totalpriceobj = $(this).find("input[name='info.totalprocurement']");
+		if (totalpriceobj != null) {
+			money = money.toFixed(3);
+			$(totalpriceobj).val(money);
+			$(totalpriceobj).prev().html(money);
+		}
+	});
+	$("#returntotal").val(Number(total).toFixed(3));//退货金额（保留两位小数）
+}
+
+function change() {
+	$("#detaillist").html("");
+}

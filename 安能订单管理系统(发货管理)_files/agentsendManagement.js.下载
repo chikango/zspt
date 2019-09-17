@@ -1,0 +1,1119 @@
+var agentsendManagement = function(){
+	
+	
+	var loadbuymateriallist=function(){
+		if($("#grid_buymateriallist").size()>0){
+			$("#grid_buymateriallist").flexigrid({
+				url:'/AgentsendManagement/searchList',
+				extParam :{
+					"info.curchooosecode":$("#curchooosecode1").val()
+				},
+				dataType:'json',
+				colModel:[{
+					display : '序号',
+					name : 'sno',
+					width : 30,
+				},{
+					display : '销售单号',
+					name : 'buyno',
+					width : 60,
+				},{
+					display : '代理商',
+					name : 'shortname',
+					width : 50,
+				},{
+					display : '单据类型',
+					name : 'buytypeshow',
+					width : 50,
+				},{
+					display : '下单人',
+					name : 'createusername',
+					width : 50,
+				},{
+					display : '下单时间',
+					name : 'createtime',
+					width : 70,
+				},{
+					display : '支付时间',
+					name : 'paymenttime',
+					width : 70,
+				},{
+					display : '提货方式',
+					name : 'choosetype',
+					width : 50,
+				},{
+					display : '状态',
+					name : 'sendstateshow',
+					width : 40,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				},{
+					display:'buystate',
+					name:'buystate',
+					hide:true
+				},{
+					display:'sendstate',
+					name:'sendstate',
+					hide:true
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 480,
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : buymaterialData,
+				checkboxid : "id"
+			});
+		}
+	}
+	function buymaterialData(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			if(cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			if(cell.paymenttime!=null){
+				cell.paymenttime = new Date(cell.paymenttime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			if(cell.choosepickuptype==1){
+				cell.choosetype="<span class='badge badge-primary'>自提</span>";
+			}else if(cell.choosepickuptype==2){
+				cell.choosetype="<span class='badge badge-default'>泰易达</span>";
+			}else if(cell.choosepickuptype==3){
+				cell.choosetype="<span class='badge badge-success'>物流快递</span>";
+			}
+			cell.actions="";
+			if ($.checkAuth("201306", data.authIds)) {
+				cell.actions+= "<a class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this,\"/AgentsendManagement/buymaterialdetail?buyid="+cell.buyid+ "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if ($.checkAuth("201307", data.authIds)) {
+				if(cell.ifhasown == 1){
+					cell.actions+= "<a class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this,\"/AgentsendManagement/sendagain?buyid="+cell.buyid+ "\");'><i class='fa fa-edit'></i> 补发</a>";
+				}
+			}
+		}
+		return data;
+	}
+	
+	var loadsending=function(){
+		if($("#grid_sending").size()>0){
+			$("#grid_sending").flexigrid({
+				url:'/AgentsendManagement/search',
+				extParam:$("#search-form-grid_sending").serializeJson(),
+				dataType:'json',
+				colModel:[{
+					display : '序号',
+					name : 'sno',
+					width : 30,
+				},{
+					display : '发货单号',
+					name : 'adcode',
+					width : 50,
+				},{
+					display : '发货仓库',
+					name : 'whname',
+					width : 60,
+				},{
+					display : '到货仓库',
+					name : 'agentwhname',
+					width : 60,
+				},{
+					display : '单据类型',
+					name : 'sendfromtypename',
+					width : 40,
+				},{
+					display : '销售单号',
+					name : 'buyno',
+					width : 50,
+				},{
+					display : '创建人',
+					name : 'createusername',
+					width : 40,
+				},{
+					display : '创建时间',
+					name : 'createtimeshow',
+					width : 40,
+				},{
+					display : '代理商',
+					name : 'agentname',
+					width : 50,
+				},{
+					display : '供应商',
+					name : 'supplyname',
+					width : 50,
+				},{
+					display : '状态',
+					name : 'adstateShowHtml',
+					width : 40,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 100,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "adid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 480,
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : sendingData,
+				checkboxid : "adid"
+			});
+		}
+	}
+	function sendingData(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			if(cell.createtime != null) {
+				cell.createtimeshow = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			cell.actions="";
+			if ($.checkAuth("201308", data.authIds)) {
+				cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+						"onclick='ajaxHtml(this,\"/AgentsendManagement/delivandarrivdetail?adid="+cell.adid+ "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if(cell.sendfromtype == 110){
+				if(cell.adstate == 1){
+					cell.adstateShowHtml = "<span class='badge badge-default'>待拣配</span>";
+					cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+					"onclick='agentsendManagement.adddispatchhtml("+cell.adid+");'><i class='fa fa-edit'></i> 调度</a>";
+				}else if(cell.adstate == 5){
+					cell.adstateShowHtml = "<span class='badge badge-warning'>待发货</span>";
+				}
+			}else{
+				if(cell.adstate == 1){
+					cell.adstateShowHtml = "<span class='badge badge-info'>待确认</span>";
+					cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+					"onclick='agentsendManagement.adddispatchhtml("+cell.adid+");'><i class='fa fa-edit'></i> 调度</a>";
+				}else if(cell.adstate == 5){
+					cell.adstateShowHtml = "<span class='badge badge-success'>已拣配</span>";
+					if(cell.needusestate == 1){
+						cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+						"onclick='agentsendManagement.adddispatchhtml("+cell.adid+");'><i class='fa fa-edit'></i> 调度</a>";
+					}
+				}
+			}
+		}
+		return data;
+	}
+	
+	
+	var loadreceiving=function(){
+		if($("#grid_receiving").size()>0){
+			$("#grid_receiving").flexigrid({
+				url:'/AgentsendManagement/search',
+				extParam:$("#search-form-grid_receiving").serializeJson(),
+				dataType:'json',
+				colModel:[{
+					display : '序号',
+					name : 'sno',
+					width : 30,
+				},{
+					display : '发货单号',
+					name : 'adcode',
+					width : 50,
+				},{
+					display : '发货仓库',
+					name : 'whname',
+					width : 60,
+				},{
+					display : '到货仓库',
+					name : 'agentwhname',
+					width : 60,
+				},{
+					display : '单据类型',
+					name : 'sendfromtypename',
+					width : 40,
+				},{
+					display : '销售单号',
+					name : 'buyno',
+					width : 50,
+				},{
+					display : '创建人',
+					name : 'createusername',
+					width : 40,
+				},{
+					display : '创建时间',
+					name : 'createtimeshow',
+					width : 40,
+				},{
+					display : '代理商',
+					name : 'agentname',
+					width : 50,
+				},{
+					display : '供应商',
+					name : 'supplyname',
+					width : 50,
+				},{
+					display : '状态',
+					name : 'adstateShowHtml',
+					width : 40,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "adid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 480,
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : receivingData,
+				checkboxid : "adid"
+			});
+		}
+	}
+	function receivingData(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			if(cell.createtime != null) {
+				cell.createtimeshow = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			cell.actions="";
+			if ($.checkAuth("201408", data.authIds)) {
+				cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+				"onclick='ajaxHtml(this,\"/AgentsendManagement/delivandarrivdetail?adid="+cell.adid+ "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if ($.checkAuth("201413", data.authIds)) {
+				cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+				"onclick='ajaxHtml(this,\"/AgentsendManagement/receivepage?adid="+cell.adid+ "\");'><i class='fa fa-edit'></i> 到货签收</a>";
+			}
+		}
+		return data;
+	}
+	
+	var loadhistory=function(){
+		if($("#grid_history").size()>0){
+			$("#grid_history").flexigrid({
+				url:'/AgentsendManagement/search',
+				extParam:$("#search-form-grid_history").serializeJson(),
+				dataType:'json',
+				colModel:[{
+					display : '序号',
+					name : 'sno',
+					width : 30,
+				},{
+					display : '发货单号',
+					name : 'adcode',
+					width : 50,
+				},{
+					display : '发货仓库',
+					name : 'whname',
+					width : 50,
+				},{
+					display : '到货仓库',
+					name : 'agentwhname',
+					width : 50,
+				},{
+					display : '单据类型',
+					name : 'sendfromtypename',
+					width : 40,
+				},{
+					display : '销售单号',
+					name : 'buyno',
+					width : 40,
+				},{
+					display : '创建人',
+					name : 'createusername',
+					width : 40,
+				},{
+					display : '创建时间',
+					name : 'createtimeshow',
+					width : 65,
+				},{
+					display : '代理商',
+					name : 'agentname',
+					width : 50,
+				},{
+					display : '供应商',
+					name : 'supplyname',
+					width : 50,
+				},{
+					display : '状态',
+					name : 'adstateShowHtml',
+					width : 40,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "adid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 480,
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : historyData,
+				checkboxid : "adid"
+			});
+		}
+	}
+	function historyData(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			if(cell.createtime != null) {
+				cell.createtimeshow = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+			cell.actions="";
+			if ($.checkAuth("201408", data.authIds)) {
+				cell.actions+= "<a class='btn btn-xs btn-success btn-outline' " +
+						"onclick='ajaxHtml(this,\"/AgentsendManagement/delivandarrivdetail?adid="+cell.adid+ "\");'><i class='fa fa-eye'></i> 详情</a>";
+			}
+		}
+		return data;
+	}
+	
+	
+	
+	return{
+		init_buymateriallist:function(){
+			loadbuymateriallist();
+		},
+		init_sending:function(){
+			loadsending();
+		},
+		init_receiving:function(){
+			loadreceiving();
+		},
+		init_history:function(){
+			loadhistory();
+		},
+		
+		searchmateriallist : function(index){
+			$.searchFlexgrid($('#grid_buymateriallist'), index);
+		},
+		searchsendlist : function(index){
+			$.searchFlexgrid($('#grid_sending'), index);
+		},
+		searchreceivelist : function(index){
+			$.searchFlexgrid($('#grid_receiving'), index);
+		},
+		searchhistorylist : function(index){
+			$.searchFlexgrid($('#grid_history'), index);
+		},
+		
+		init_organization : function() {
+			$("#orgname").bsSuggest({
+				url : "/SplitBill/getSupplier",
+				effectiveFields : [ "showname" ],
+				idField : "id",
+				keyField : "showname",
+				showBtn : false,
+			}).on("onSetSelectValue", function(e, row) {
+				var id = $("#orgname").attr("data-id");
+				$("#supplid").val(id);
+				$("#taxrate").val(row.taxrate);
+			});
+		},
+		
+		buymaterialdetailpop :function(buyid){
+            gener.dialog({
+                url : "/AgentsendManagement/buymaterialdetailpop?buyid=" + buyid,
+                title : "销售单发货详情",
+                width : "80%",
+                height : "90%",
+                func : function() {
+                }
+            });
+        },
+        
+        addsplithtml :function(){
+            gener.dialog({
+                url : "/AgentsendManagement/addsplithtml",
+                title : "新增拆单",
+                width : "80%",
+                height : "90%",
+                func : function() {
+                }
+            });
+        },
+        
+        adddispatchhtml:function(adid){
+        	 gener.dialog({
+                 url : "/AgentsendManagement/adddispatchhtml?info.adid="+adid,
+                 title : "计划调度",
+                 width : "80%",
+                 height : "90%",
+                 func : function() {
+                 }
+             });
+        },
+
+		submit_splitlist:function(){
+			debugger
+			var operationtype = $("#operationtype").val();
+			if(operationtype == 2){//确认直发需要选供应商
+				var supplid = $("#supplid").val();
+				if (typeof (supplid) == undefined || supplid == "") {
+					//gener.tip("请选择供应商！",$("#orgname"));
+					gener.tip("请选择供应商！");
+					return;
+				}
+				var orgname = $("#orgname").val();
+				if (typeof (orgname) == undefined || orgname == "") {
+					//gener.tip("请选择供应商！",$("#orgname"));
+					gener.tip("请选择供应商！");
+					return;
+				}
+			}else if(operationtype == 1){
+				var cancelway = $("#cancelway").val();
+				if(cancelway == 1){
+					var toadid = $("#toadid").val();
+					if(toadid == "" || toadid == undefined){
+						gener.tip("未选择发货单或没有符合条件的发货单！",$("#toadid"));
+						return;
+					}
+				}else if(cancelway == 2){
+					//无需处理
+				}else{
+					gener.tip("请选择取消方式！",$("#cancelway"));
+					return;
+				}
+			}
+			var iscansave=true;
+			var linklist=[];
+			$("#cansplitgrid tr").each(function (index) {
+				debugger
+				var applyamount=$(this).find("input[name='applyamount']").val();//未发数量
+				var splitamount=$(this).find("input[name='splitamount']").val();//拆单数量
+				var splitamountobj=$(this).find("input[name='splitamount']");
+				var detailid=$(this).find("input[name='detailid']").val();
+				var materialcode=$(this).find("input[name='materialcode']").val();
+				var childmaterialcode = $(this).find("select[name='childmaterialcode']").val();
+				
+				if(operationtype == 2){
+					if(childmaterialcode == "" || childmaterialcode == undefined){
+						gener.tip("请选择子料号",$(this).find("select[name='childmaterialcode']"));
+						iscansave=false;
+						return;
+					}
+				}
+				if(splitamount!=null&&splitamount.length>0) {
+					if(parseInt(splitamount) > parseInt(applyamount)){
+						 gener.tip("本次使用数量不能大于可用数量",$(splitamountobj));
+						 iscansave=false;
+						 return;
+					}
+					if(childmaterialcode == "" || childmaterialcode == undefined){
+						childmaterialcode = materialcode;
+					}
+					var saveobj={
+							"materialcode":materialcode,
+							"childmaterialcode":childmaterialcode,
+							"splitamount":splitamount
+					      } 
+					linklist.push(saveobj);
+				}
+			});
+			if(!iscansave){
+				return;
+			}
+			if(linklist.length==0){
+				 gener.tip("至少需要选择一项物料！");
+				 return;
+			}
+			var info = $("#addform").serializeJson();
+			info["info.detailList"]=linklist;
+			var tipmsg = "";
+			if(operationtype == 0){
+				tipmsg = "拆单过程不可逆!</br>您是否确认继续?";
+			}else if(operationtype == 1){
+				tipmsg = "取消后将由仓库发货！您是否取消直发?";
+			}else if(operationtype == 2){
+				tipmsg = "您是否确认直发?";
+			}
+			gener.confirm(tipmsg,function(){
+				$("#submitActions").hide();
+				gener.ajaxPost("/AgentsendManagement/submitSplit",info, function(result) {
+					if (result.state >0 ) {
+						gener.success(result.msg, function() {
+	        	    		// 刷新列表数据
+							parent.$("#grid_sending").flexReload();
+							$(".btn-close").click();
+						});
+					}else{
+						$("#submitActions").show();
+						gener.alert(result.msg);
+					}
+				});
+			});
+		},
+		
+		submit_stopdirect:function(){
+			var cancelway = $("#cancelway").val();
+			if(cancelway == 1){
+				var toadid = $("#toadid").val();
+				if(toadid == "" || toadid == undefined){
+					gener.tip("未选择发货单或没有符合条件的发货单！",$("#toadid"));
+					return;
+				}
+			}else if(cancelway == 2){
+				//无需处理
+			}else{
+				gener.tip("请选择取消方式！",$("#cancelway"));
+				return;
+			}
+			var iscansave=true;
+			var linklist=[];
+			$("#cansplitgrid tr").each(function (index) {
+				debugger
+				var canuseamount=$(this).find("input[name='canuseamount']").val();//可终止数量
+				var cancelamount=$(this).find("input[name='cancelamount']").val();//终止数量
+				var cancelamountobj=$(this).find("input[name='cancelamount']");
+				var detailid=$(this).find("input[name='detailid']").val();
+				var materialcode=$(this).find("input[name='materialcode']").val();
+				if(cancelamount!=null&&cancelamount.length>0) {
+					if(parseInt(cancelamount) > parseInt(canuseamount)){
+						 gener.tip("本次使用数量不能大于未关联发货数量",$(cancelamountobj));
+						 iscansave=false;
+						 return;
+					 }
+					 var saveobj={
+								"id":detailid,
+								"materialcode":materialcode,
+								"cancelamount":cancelamount
+					       } 
+					 linklist.push(saveobj);
+				}
+			});
+			if(!iscansave){
+				return;
+			}
+			if(linklist.length==0){
+				 gener.tip("至少需要选择一项物料！");
+				 return;
+			}
+			var info = $("#addform").serializeJson();
+			$.extend(info, {"needdetailList" : linklist});
+			//info["info.detailList"]=linklist;
+			gener.confirm("取消后将由仓库发货！您是否取消直发?",function(){
+				$("#submitActions").hide();
+				gener.ajaxPost("/AgentsendManagement/ac_stopdirect",info, function(result) {
+					if (result.state >0 ) {
+						gener.success(result.msg, function() {
+	        	    		// 刷新列表数据
+							parent.$("#grid_sending").flexReload();
+							$(".btn-close").click();
+						});
+					}else{
+						$("#submitActions").show();
+						gener.alert(result.msg);
+					}
+				});
+			});
+		},
+		
+		submit_receiveGoodfrom:function(){
+	        	var hasproblem = $("input[name='info.hasproblem']:checked").val();
+	 			if(typeof(hasproblem)=="undefined"){
+	 				gener.tip("请先确认签收结论!",$("#hasroblem"));
+					return;
+	 			}
+	 			if(hasproblem=="1"){
+	 				var problemdesc = $("#problemdesc").val();
+	 				if($.trim(problemdesc)==""){
+	 					gener.tip("问题描述不能为空!",$("#problemdesc"));
+	 					return;
+	 				}
+	 			}
+	 			var imageList = new Array();
+	 			var documentlist = $(".links li").find("input[name='picture']");
+	 			if (documentlist.length == 0) {
+	 				gener.alert("请上传签收凭证!");
+	 				return; 
+	 				imageList = null;
+	 			}else {
+	 				$.each(documentlist, function() {
+	 					var obj = { "documentid":$(this).attr("documentid")};
+	 					imageList.push(obj);
+	 				});
+	 			}
+	 			var info=$("#addform").serializeJson();
+	 			$.extend(info,{"imageList":imageList});
+	 			gener.confirm("是否确认签收?",function(){
+			        gener.ajaxPost("/AgentsendManagement/ac_receiveGoodfrom",info,function(result) {
+					    if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+		        	    		// 刷新列表数据
+								$("#grid_receiving").flexReload();
+							});
+					    } else {
+					    	gener.error(result.msg);
+					    }
+					});
+			   });
+	       },
+	       
+	    submit_sendagain:function(){
+	    	var iscansave=true;
+			var linklist=[];
+			$("#cansplitgrid tr").each(function (index) {
+				debugger
+				var owmamount=$(this).find("input[name='owmamount']").val();//
+				var newneedamount=$(this).find("input[name='newneedamount']").val();//
+				var newneedamountobj=$(this).find("input[name='newneedamount']");
+				var detailid=$(this).find("input[name='detailid']").val();
+				var materialcode=$(this).find("input[name='materialcode']").val();
+				if(newneedamount!=null&&newneedamount.length>0) {
+					if(parseInt(newneedamount) > parseInt(owmamount)){
+						 gener.tip("发货数量不能大于未发货数量",$(newneedamountobj));
+						 iscansave=false;
+						 return;
+					 }
+					 var saveobj={
+								"id":detailid,
+								"materialcode":materialcode,
+								"newneedamount":newneedamount
+					       } 
+					 linklist.push(saveobj);
+				}
+			});
+			if(!iscansave){
+				return;
+			}
+			if(linklist.length==0){
+				 gener.tip("至少需要选择一项物料！");
+				 return;
+			}
+			var info = $("#addform").serializeJson();
+			$.extend(info, {"sendbomlist" : linklist});
+			gener.confirm("确定发货?",function(){
+				$("#submitActions").hide();
+				gener.ajaxPost("/AgentsendManagement/ac_sendagain",info, function(result) {
+					if (result.state >0 ) {
+						gener.success(result.msg, function() {
+	        	    		// 刷新列表数据
+							parent.$("#grid_sending").flexReload();
+							$(".btn-close").click();
+						});
+					}else{
+						$("#submitActions").show();
+						gener.alert(result.msg);
+					}
+				});
+			});
+	    },
+	    
+	    init_Annengsuggest : function(type) {
+			$("#whname"+type).bsSuggest({
+				url : "/StockManagement/getAnnengWhwareList?whname=",
+				oldurl: "/StockManagement/getAnnengWhwareList",
+				effectiveFields : ["whname"],
+				idField : "whid",
+				keyField : "whname",
+				showBtn : false,
+			});
+		},
+		
+		init_Agentsuggest : function(key) {
+			$("#agentwhname"+key).bsSuggest({
+				url : "/StockManagement/getAgencysList?whname=",
+				oldurl: "/StockManagement/getAgencysList",
+				effectiveFields : ["whname"],
+				idField : "whid",
+				keyField : "whname",
+				showBtn : false,
+			});
+		},
+		
+		init_SupplyList : function(type) {
+			$("#orgname"+type).bsSuggest({
+				url : "/SplitBill/getSupplier",
+				effectiveFields : [ "showname" ],
+				idField : "id",
+				keyField : "showname",
+				showBtn : false,
+			});
+		},
+		
+		
+		/***********************************************************************************************************
+		 * 
+		 */
+		init_sendgood : function() {
+			$("#adcode").bsSuggest({
+				url : "/AgentsendManagement/getSendlist",
+				effectiveFields : [ "adcode" ],
+				idField : "adid",
+				keyField : "adcode",
+				showBtn : false,
+			}).on("onSetSelectValue", function(e, row) {
+				var adid = $("#adcode").attr("data-id");
+				$("#adid").val(adid);
+				$("#taxrate").val(row.taxrate);
+				if(typeof(adid)!="undefined" && $.trim(adid)!=""){
+					$("#fromno").val(row.fromno);
+					$("#sendfromtypename").val(row.sendfromtypename);
+					var logistictype = row.logistictype;
+					var xradioname = document.getElementsByName("info.logistictype");
+					for(var i=0;i<xradioname.length;i++){
+                        if(xradioname[i].value == logistictype){
+                        	xradioname[i].checked = true;
+                            break;
+                        }
+                    }
+					$("#receivename").val(row.receivename);
+					$("#receiveidcard").val(row.receiveidcard);
+					$("#receivephonecode").val(row.receivephonecode);
+					$("#receivecarcode").val(row.receivecarcode);
+					$("#logisticcode").val(row.logisticcode);
+					$("#logisticsunit").val(row.logisticsunit);
+					$("#consigneename").val(row.consigneename);
+					$("#consigneephone").val(row.consigneephone);
+					$("#consigneeaddress").val(row.consigneeaddress);
+					$("#logisticremark").val(row.logisticremark);
+					var sendfromtype = $("#sendfromtype").val();
+					agentsendManagement.createTablehtml(adid,sendfromtype);
+				}else{
+					$("#cansplitgrid").html(""); 
+				}
+			});
+		},
+		
+		createTablehtml:function(adid,sendfromtype){
+			gener.ajaxPost("/AgentsendManagement/getDetailList", 
+				{"info.adid":adid,"info.sendfromtype":sendfromtype},function(data){
+				if(data != null){
+					var addhtml = "";
+					for(var i = 0 ; i < data.length; i++){
+						var obj = data[i];
+						var childcodeHtml = "";
+						if(sendfromtype == 110){
+							childcodeHtml = "<td style='text-align: center;'>"+obj.materialcode+
+												"<input type='hidden' style=\"text-align: center;\" class='form-control' value='"+obj.materialcode+"' name='info.childmaterialcode' readonly/>"+
+											"</td>" 
+						}else{
+							var htmlstr = "";
+							if(obj.childList!=null && obj.childList.length>0){
+								for(var j = 0 ; j < obj.childList.length; j++){
+									var childobj = obj.childList[j];
+									htmlstr+="<option value='"+childobj.materialcode+"'>"+childobj.materialcode+"</option>"
+								}
+							}
+							childcodeHtml = "<td style='text-align: center;'>"+
+												"<select class='selectpicker form-control' style='width:100%;text-align: center;' name='info.childmaterialcode'>"+
+													"<option value=''> --请选择-- </option>"+htmlstr+
+												"</select>"+
+											"</td>" 
+						}
+						addhtml += "<tr>" +
+									"<td style='text-align: center;'>"+(i+1)+"</td>" +
+									"<td style='text-align: center;'>" +obj.materialcode+
+									"</td>" +childcodeHtml+
+									"<td style='text-align: center;'>"+obj.materialname+"</td>" +
+									"<td style='text-align: center;'>"+obj.groupname+"</td>" +
+									"<td style='text-align: center;'>"+obj.applyamount+"</td>" +
+									"<td style='text-align: center;'>" +
+										"<input type='hidden' style=\"text-align: center;\" class='form-control' value='"+obj.detailid+"' name='info.detailid' readonly/>"+
+										"<input type='hidden' style=\"text-align: center;\" class='form-control' value='"+obj.applyamount+"' name='info.applyamount' readonly/>"+
+										"<input type='hidden' style=\"text-align: center;\" class='form-control' value='"+obj.materialcode+"' name='info.materialcode' readonly/>"+
+										"<input type='text' style='text-align: center;' class='form-control' value='' " +
+										"name='info.splitamount'onkeyup='gener.checkNumber(this,1);' onblur='gener.checkNumber(this,1);'/>" +
+									"</td>" +
+									"</tr>";
+					}
+					$("#cansplitgrid").html("");
+					$("#cansplitgrid").append(addhtml); 
+				}
+			});
+		},
+		
+		
+		submit_addsplit:function(){
+			var adid = $("#adid").val();
+			if (typeof (adid) == undefined || adid == "") {
+				gener.tip("请选择要拆单的发货单");
+				return;
+			}
+			var adcode = $("#adcode").val();
+			if (typeof (adcode) == undefined || adcode == "") {
+				gener.tip("请选择要拆单的发货单！");
+				return;
+			}
+			var sendfromtype = $("#sendfromtype").val();
+			if(sendfromtype == 112){//直发单选择供应商
+				var supplid = $("#supplid").val();
+				if (typeof (supplid) == undefined || supplid == "") {
+					gener.tip("请选择供应商！");
+					return;
+				}
+				var orgname = $("#orgname").val();
+				if (typeof (orgname) == undefined || orgname == "") {
+					gener.tip("请选择供应商！");
+					return;
+				}
+			}
+			
+			var iscansave=true;
+			var linklist=[];
+			$("#cansplitgrid tr").each(function (index) {
+				debugger
+				var applyamount=$(this).find("input[name='info.applyamount']").val();//未发数量
+				var splitamount=$(this).find("input[name='info.splitamount']").val();//拆单数量
+				var splitamountobj=$(this).find("input[name='info.splitamount']");
+				var detailid=$(this).find("input[name='info.detailid']").val();
+				var materialcode=$(this).find("input[name='info.materialcode']").val();
+				
+				var childmaterialcode;
+				if(sendfromtype == 112){
+					childmaterialcode = $(this).find("select[name='info.childmaterialcode']").val()
+				}else{
+					childmaterialcode = $(this).find("input[name='info.childmaterialcode']").val();
+				}
+				
+				if(sendfromtype == 112){
+					if(childmaterialcode == "" || childmaterialcode == undefined){
+						gener.tip("请分配子料号");
+						iscansave=false;
+						return;
+					}
+				}
+				if(splitamount!=null&&splitamount.length>0) {
+					if(parseInt(splitamount) > parseInt(applyamount)){
+						 gener.tip("本次使用数量不能大于可用数量",$(splitamountobj));
+						 iscansave=false;
+						 return;
+					}
+					if(childmaterialcode == "" || childmaterialcode == undefined){
+						childmaterialcode = materialcode;
+					}
+					var saveobj={
+							"materialcode":materialcode,
+							"childmaterialcode":childmaterialcode,
+							"splitamount":splitamount
+					      } 
+					linklist.push(saveobj);
+				}
+			});
+			if(!iscansave){
+				return;
+			}
+			if(linklist.length==0){
+				 gener.tip("至少需要选择一项物料！");
+				 return;
+			}
+			debugger
+			var info = $("#addform").serializeJson();
+			info["info.detailList"]=linklist;
+			gener.confirm("您确认拆单吗？",function(){
+				//$("#submitActions").hide();
+				gener.ajaxPost("/AgentsendManagement/newsubmitSplit",info, function(result) {
+					if (result.state >0 ) {
+						gener.success(result.msg, function() {
+	        	    		// 刷新列表数据
+							parent.$("#grid_sending").flexReload();
+							//$(".btn-close").click();
+							gener.dialogSuc();
+						});
+					}else{
+						$("#submitActions").show();
+						gener.alert(result.msg);
+					}
+				});
+			});
+		},
+		
+		submit_dispatch:function(){
+			debugger
+			var sendfromtype = $("#sendfromtype").val();
+			var changetype = $("#changetype").children('option:selected').val();
+			
+			var iscansave=true;
+			var linklist=[];
+			$("#cansplitgrid tr").each(function (index) {
+				debugger
+				var splitamount=$(this).find("input[name='splitamount']").val();//拆单数量
+				var materialcode=$(this).find("input[name='materialcode']").val();
+				var childmaterialcode;
+				if(sendfromtype == 110){
+					childmaterialcode = $(this).find("select[name='childmaterialcode']").val();
+					if(childmaterialcode == "" || childmaterialcode == undefined){
+						gener.tip("请分配子料号");
+						iscansave=false;
+						return;
+					}
+				}else{
+					if(changetype == 2 || changetype == 3){
+						childmaterialcode = $(this).find("select[name='childmaterialcode']").val();
+						if(childmaterialcode == "" || childmaterialcode == undefined){
+							gener.tip("请分配子料号");
+							iscansave=false;
+							return;
+						}
+					}
+				}
+				var saveobj={
+						"materialcode":materialcode,
+						"childmaterialcode":childmaterialcode,
+						"splitamount":splitamount
+				      } 
+				linklist.push(saveobj);
+				
+			});
+			if(!iscansave){
+				return;
+			}
+			var cansave = true;
+			if(sendfromtype == 110){//正常--转--直发：要选择供应商，收货人信息必填
+				cansave = agentsendManagement.direct_verification();
+			}else{
+				if(changetype != 1){
+					cansave = agentsendManagement.direct_verification();
+				}
+			}
+			if(!cansave){
+				return;
+			}
+			if(cansave && iscansave){
+				var info = $("#addform").serializeJson();
+				info["info.cancelway"]=changetype;
+				info["info.detailList"]=linklist;
+				gener.confirm("您确认提交吗？",function(){
+					gener.ajaxPost("/AgentsendManagement/submitDispatch",info, function(result) {
+						if (result.state >0 ) {
+							gener.success(result.msg, function() {
+		        	    		// 刷新列表数据
+								parent.$("#grid_sending").flexReload();
+								gener.dialogSuc();
+							});
+						}else{
+							$("#submitActions").show();
+							gener.alert(result.msg);
+						}
+					});
+				});
+			}
+			
+		},
+		
+		direct_verification:function(){
+			debugger
+			var supplid = $("#supplid").val();
+			if (typeof (supplid) == undefined || supplid == "") {
+				gener.tip("请选择供应商！");
+				return false;
+			}
+			var orgname = $("#orgname").val();
+			if (typeof (orgname) == undefined || orgname == "") {
+				gener.tip("请选择供应商！");
+				return false;
+			}
+			var consigneename = $("#consigneename").val();
+			if (typeof (consigneename) == undefined || consigneename == "") {
+				gener.tip("请填写收货人姓名！");
+				return false;
+			}
+			var consigneephone = $("#consigneephone").val();
+			if (typeof (consigneephone) == undefined || consigneephone == "") {
+				gener.tip("请填写收货人电话！");
+				return false;
+			}
+			var consigneeaddress = $("#consigneeaddress").val();
+			if (typeof (consigneeaddress) == undefined || consigneeaddress == "") {
+				gener.tip("请选择收货人地址！");
+				return false;
+			}
+			return true;
+		},
+		
+		
+		
+	}
+	
+	
+}();
+
+
+//导出BOM清单(详情页面)
+function exportBomDetail(buyid){
+	gener.ajaxPost("/AgentsendManagement/exportBomDetail",{"buyid":buyid},function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+			 });
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}
+
+function exportBuymateriallist(){
+	var info = $("#search-form-grid_buymateriallist").serializeJson();
+	gener.ajaxPost("/AgentsendManagement/exportBuymateriallist",info,function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+				gener.dialogSuc();
+			});
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}
+function exportSendList(type){
+	var info = $("#search-form-"+type).serializeJson();
+	gener.ajaxPost("/AgentsendManagement/exportStationReport",info,function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+				gener.dialogSuc();
+			});
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}
+

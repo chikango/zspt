@@ -1,0 +1,644 @@
+var checkeds = new Array();
+var antransferstock = function() {
+	/**
+	 * 入库清单列表
+	 */
+    var loaddata = function() {
+	if ($("#grid_in").size() > 0) {
+	    $("#grid_in").flexigrid({
+			url : '/AnTransferStock/search',
+			dataType : 'json',
+			colModel : [{
+				display : '序号',
+				name : 'num',
+				width : 20,
+				align : 'left',
+			}, {
+				display : '移库单号',
+				name : 'codeno',
+				width : 60,
+			}, {
+				display : '下单单位',
+				name : 'orgname',
+				width : 60,
+			}, {
+				display : '下单人',
+				name : 'username',
+				width : 60,
+			}, {
+				display : '出库仓',
+				name : 'outwhname',
+				width : 80,
+			}, {
+				display : '入库仓',
+				name : 'inwhname',
+				width : 80,
+			}, {
+				display : '状态',
+				name : 'orderstatecolername',
+				width : 80,
+			}, {
+				display : '下单时间',
+				name : 'createtime',
+				width : 80,
+			}, {
+			    display : '操作',
+			    name : 'actions',
+			    width : 80,
+			} ],
+			minColToggle : 1,
+			onrowclick : false,
+			sortname : "id",
+			sortcollection : "desc",
+			usepager : true,
+			useRp : true,
+			rp : 15,
+			resizable : false,
+			width : 'auto',
+			height : 'auto',
+			autoload : true,
+			singleSelect : true,
+			specify : true,
+			striped : true,
+			showcheckbox : false,
+			showToggleBtn : true,
+			mutliSelect : false,
+			preProcess : processData,
+		    });
+		}
+    };
+    function processData(data) {
+		for (var i = 0; i < data.rows.length; i++) {
+		    var cell = data.rows[i].cell;
+		    cell.num = i + 1;
+		    cell.actions = "";
+		    if ($.checkAuth("160605", data.authIds)) {
+		    	cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/AnTransferStock/detailfrom?id=" + cell.id + "\")'><i class='fa fa-eye'></i> 详情</a>";
+		    }
+		    if(cell.createtime!=null){
+				cell.createtime=new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+    		if ($.checkAuth("160603", data.authIds)) {
+    			if(cell.orderstate == 0){
+    				cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/AnTransferStock/editfrom?id=" + cell.id + "\")'><i class='fa fa-edit'></i> 编辑</a>";
+    				cell.actions += "<a  class='btn btn-xs btn-success btn-outline' href='javascript:antransferstock.termfrom("+cell.id+")'><i class='fa fa-reply'></i>终止</a>";
+    			}
+    		}
+		}
+		return data;
+    }
+    /**
+     * 入库审核列表
+     */
+    var loaddataCheck = function() {
+    	if ($("#grid_check").size() > 0) {
+    		$("#grid_check").flexigrid({
+    			url : '/AnTransferStock/searchCheck',
+    			dataType : 'json',
+    			colModel : [ {
+    				display : '序号',
+    				name : 'num',
+    				width : 20,
+    				align : 'left',
+    			}, {
+    				display : '移库单号',
+    				name : 'codeno',
+    				width : 60,
+    			}, {
+    				display : '下单部门',
+    				name : 'orgname',
+    				width : 60,
+    			}, {
+    				display : '下单人',
+    				name : 'username',
+    				width : 60,
+    			}, {
+    				display : '出库仓',
+    				name : 'outwhname',
+    				width : 80,
+    			}, {
+    				display : '入库仓',
+    				name : 'inwhname',
+    				width : 80,
+    			}, {
+    				display : '状态',
+    				name : 'orderstatecolername',
+    				width : 80,
+    			}, {
+    			    display : '操作',
+    			    name : 'actions',
+    			    width : 80,
+    			} ],
+    			minColToggle : 1,
+    			onrowclick : false,
+    			sortname : "id",
+    			sortcollection : "desc",
+    			usepager : true,
+    			useRp : true,
+    			rp : 15,
+    			resizable : false,
+    			width : 'auto',
+    			height : 'auto',
+    			autoload : true,
+    			singleSelect : true,
+    			specify : true,
+    			striped : true,
+    			showcheckbox : false,
+    			showToggleBtn : true,
+    			mutliSelect : false,
+    			preProcess : processDataCheck,
+    		});
+    	}
+    };
+    
+    function processDataCheck(data) {
+    	for (var i = 0; i < data.rows.length; i++) {
+    		//debugger;
+    		var cell = data.rows[i].cell;
+    		cell.num = i + 1;
+    		cell.actions = "";
+    		if(cell.orderstate != null){
+    			
+    		}
+    		if ($.checkAuth("160605", data.authIds)) {
+    	    	cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/AnTransferStock/detailfrom?id=" + cell.id + "\")'><i class='fa fa-eye'></i> 详情</a>";
+    	    }
+    		if ($.checkAuth("160604", data.authIds)) {
+    			if(cell.orderstate == 3){
+    				cell.actions += "<a  class='btn btn-xs btn-success btn-outline' onclick='ajaxHtml(this, \"/AnTransferStock/checkfrom?id=" + cell.id + "\")'><i class='fa fa-check'></i> 审核</a>";
+    			}
+    		}
+    	}
+    	return data;
+    }
+    var loaddataMaterials = function(){
+		if($("#grid_materials").size() > 0){
+			$("#grid_materials").flexigrid({
+				url : '/AnTransferStock/searchMaterial',
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : '20',
+				},{
+					display : '物料编码',
+				    name : 'materialcode',
+				    width : 70,
+				},{
+				    display : '物料名称',
+				    name : 'materialname',
+				    width : 170,
+				},{
+					display : '物料组',
+					name : 'materialgroupname',
+					width : 50,
+				},{
+					display : '单位',
+					name : 'materialunit',
+					width : 50,
+				},{
+					display : '操作',
+				    name : 'actions',
+				    width : 70,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "id",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 10,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processData_material,
+				onSuccess: antransferstock.clickcheckbox,
+			});
+		}
+	};
+	function processData_material(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			cell.sno=i+1;
+			//是否已选
+			if (typeof(cell.materialcode) != "undefined") {
+        		// 是否已选
+        		var ischecked = "";
+        		for (var j = 0; j < checkeds.length; j++) {
+        		    if (checkeds[j].materialcode == cell.materialcode) {
+        			ischecked = "checked";
+        			break; // 终止循环
+        		    }
+        		}
+    		    cell.actions = "<input type='checkbox' onclick='antransferstock.checkOne(this);' " + ischecked + "/>";
+			} else {
+        		cell.actions = "<input type='checkbox' checked disabled/>";
+    	    }
+		}
+		return data;
+	};
+	
+    var search = function(pageIndex) {
+    	$.searchFlexgrid($('#grid_in'), pageIndex);
+    };
+    var searchCheck = function(pageIndex) {
+    	$.searchFlexgrid($('#grid_check'), pageIndex);
+    };
+    var searchMaterials = function(pageIndex){
+		$.searchFlexgrid($('#grid_materials'), pageIndex);
+	};
+    return {
+		init : function() {
+		    loaddata();
+		},
+		initCheck : function() {
+			loaddataCheck();
+		},
+		initMaterials : function() {
+			loaddataMaterials();
+		},
+		
+		init_suggest : function(key) {
+			$("#whname"+key).bsSuggest({
+				url : "/StockManagement/getAnnengWhwareList?whname=",
+				oldurl: "/StockManagement/getAnnengWhwareList",
+				effectiveFields : ["whname"],
+				idField : "whid",
+				keyField : "whname",
+				showBtn : false,
+		    });
+		},
+		
+		search : function(index) {
+		    search(index);
+		},
+		searchCheck : function(index) {
+			searchCheck(index);
+		},
+		searchMaterials : function(index) {
+			searchMaterials(index);
+		},
+		
+		addMaterial:function(){
+		    var outwhid = $("#outwhid").val();
+		    if (typeof (outwhid) == "undefined" || outwhid == "") {
+		    	gener.tip("请选择调出仓库！");
+		    	return;
+		    }
+			gener.dialog({
+				url : "/AnOutStock/moreMaterial?whid="+outwhid,
+				title : "新增物料",
+				width : "70%",
+				height : "80%",
+				func : function() {
+				}
+			});
+		},
+		checkOne : function(obj){
+			//维护已选数组
+			var currow = $(obj).closest("tr");
+			if($(obj).prop("checked")){//勾选则插入
+				var obj = new Object();
+				obj.materialcode = currow.find("td").eq(1).text();
+				obj.materialname = currow.find("td").eq(2).text();
+				obj.groupname = currow.find("td").eq(3).text();
+				obj.materialunit = currow.find("td").eq(4).text();
+				checkeds.push(obj);
+			}else{//取消勾选则删除
+				for (var i = 0; i < checkeds.length; i++) {
+				    if (checkeds[i].materialcode == currow.find("td").eq(1).text()) {
+					checkeds.splice(i, 1);
+					break; // 终止循环
+				    }
+				}
+			}
+		},
+		
+		clickcheckbox:function () {
+			$("tr:not(':first')").click(function(e){ 
+        		var check = $(this).find("input[type='checkbox']");
+        		if(check){  
+        			var flag = check[0].checked;  
+        			if(flag){  
+        				check[0].checked = false; 
+        			}else{  
+        				check[0].checked = true;
+        			}  
+        			antransferstock.checkOne(check.get(0));
+        		} 
+        	});   
+        	$("input[type='checkbox']").click(function(e){  
+        		e.stopPropagation();   
+        	}); 
+        },
+		
+		submit_materials : function(){
+			var cleartype = $("#cleartype").val();
+			if (checkeds.length == 0) {
+				gener.tip("请勾选物料！");
+				return;
+			}
+			var html = "";
+			var table = parent.$("#grid_tbody");
+			var seq = table[0].rows.length;
+			 $(checkeds).each(function() {
+				var existcount = 0;
+				if (table.find("input[name='materials.materialcode'][value='" + this.materialcode + "']").length > 0) {
+				    existcount++;
+				} else {
+					html += "<tr><td name='seq'>"+ (seq+1) + "</td>"
+					     + "<td>"+ this.materialcode + "</td>"
+					     + "<td>"+ this.materialname+ "</td>"
+					     + "<td>"+ this.groupname+ "</td>"
+					     + "<td><input type=\"text\" name=\"materials.amount\" onkeyup=\"this.value=this.value.replace(/\\D/g,'');\"  onafterpaste=\"this.value=this.value.replace(/\\D/g,'')\" class=\"form-control \" value=\"\"></td>"
+					     + "<td class='actionmtd'>"
+					     + 		"<a onclick='rowDel(this);' class='btn btn-xs btn-success btn-outline' style='margin-bottom:0;'><i class='fa fa-trash-o'></i> 删除</a>"
+					     + 		"<input type=\"hidden\" name=\"materials.materialcode\" value=\""+ this.materialcode+ "\" readonly>"
+					     +	"</td></tr>";
+					seq++;
+				}
+			    })
+		    table.append(html);
+		    gener.dialogClose();
+		},
+		
+		/**
+		 * 导入bom
+		 */
+		importBom:function(id) {
+			var info = $("#addform").serializeJson();
+		    fileupdown.submit_upload("/AnTransferStock/importBom",info,id,function(result) {
+				if (result.state > 0) {
+				    var html = "";
+				    $("#grid_tbody").html("");
+				    var table = $("#grid_tbody");
+				    if (typeof (result.msg) != "undefined" && result.msg.length > 0) {
+					var sno = 0;
+					for (var i = 0; i < result.msg.length; i++) {
+					    var obj = result.msg[i];
+					    html += "<tr><td name='seq'>"+ (sno+1) + "</td>"
+						     + "<td>"+ obj.materialcode + "</td>"
+						     + "<td>"+ obj.materialname+ "</td>"
+						     + "<td>"+ obj.groupname+ "</td>"
+						     + "<td>"+ obj.materialunit+ "</td>"
+						     + "<td><input type=\"text\" name=\"materials.amount\" value="+obj.clearamount+" onkeyup=\"this.value=this.value.replace(/\\D/g,'');\"  onafterpaste=\"this.value=this.value.replace(/\\D/g,'')\" class=\"form-control \" on value=\"\"></td>"
+						     + "<td class='actionmtd'>"
+						     + 		"<a onclick='rowDel(this);' class='btn btn-xs btn-success btn-outline' style='margin-bottom:0;'><i class='fa fa-trash-o'></i> 删除</a>"
+						     + 		"<input type=\"hidden\" name=\"materials.materialcode\" value=\""+ obj.materialcode+ "\" readonly>"
+						     +	"</td></tr>";
+					    sno+=1;
+					}
+					if (html != "") {
+					    table.append(html);
+					    gener.success("导入成功!");
+					}
+					$("#file").val("");
+				    }
+				} else {
+				    if (result.state == 0) {
+				    	gener.error(result.msg);
+				    } else {
+				    	gener.alert(result.msg);
+				    }
+				    $("#file").val("");
+				}
+		    });
+		},
+
+		/**
+		 * 提交单据
+		 */
+		submit_addfrom:function(){
+			if($("#addform").valid()){
+				var results=1;
+				/*var amountArr = $("#grid_tbody").find("input[name='materials.amount']");
+				$.each(amountArr,function(){
+					if(typeof($(this).val())!="undefined" && $.trim($(this).val())==""){
+						gener.tip("请输入移库数量!",$(this));
+						results=0;
+						return false;
+					}else if(Number($.trim($(this).val()))<=0){
+						gener.tip("移库数量必须为正整数!",$(this));
+						results=0;
+						return false;
+					}
+				});*/
+				
+				var bomlist = new Array();
+				var trs=$("#grid_tbody").find("tr");
+				$.each(trs,function(){
+					var thisObj = $(this).find("input[name='materials.amount']");
+					var amount = $.trim($(this).find("input[name='materials.amount']").val());//出库数量
+					if (amount.length == 0) {
+						gener.tip("请输入移库数量!", $(thisObj));
+						results = 0;
+						return false;
+					}
+					if (!Common.IsIntThanZero(amount)) {
+					  gener.tip("移库数量需为正整数", $(thisObj));
+					  results = 0;
+					  return false;
+					}
+					var canuseamount = $.trim($(this).find("input[name='materials.useamount']").val());//可出口数量
+					if (Number(amount)>Number(canuseamount)) {
+						gener.tip("移库数量不能大于可出库数量！", $(thisObj));
+						results = 0;
+						return false;
+					}
+					
+					var obj= {
+							"amount":$(this).find("[name='materials.amount']").val(),
+							"materialcode":$(this).find("[name='materials.materialcode']").val()};
+					bomlist.push(obj);
+				});
+				if(results==0){
+					return;
+				}
+				if(bomlist.length==0){
+					gener.tip("移库清单列表不能为空！");
+					return;
+				} 
+				gener.confirm("确认提交?",function(){
+					var info=$("#addform").serializeJson();
+					$.extend(info,{"bomlist":bomlist});
+					gener.ajaxPost("/AnTransferStock/ac_addfrom",info, function(result) {
+						if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+								// 刷新列表数据
+								$("#grid_check").flexReload();
+								$("#grid_in").flexReload();
+							});
+						}else {
+							//gener.alert(result.msg);
+							gener.error(result.msg);
+						}
+					});
+				});
+			}
+		},
+		
+		/**
+		 * 编辑
+		 */
+		submit_editfrom:function(){
+			if($("#addform").valid()){
+				var results=1;
+				/*var amountArr = $("#grid_tbody").find("input[name='materials.amount']");
+				$.each(amountArr,function(){
+					if(typeof($(this).val())!="undefined" && $.trim($(this).val())==""){
+						gener.tip("请输入移库数量!",$(this));
+						results=0;
+						return false;
+					}else if(Number($.trim($(this).val()))<=0){
+						gener.tip("移库数量必须为正整数!",$(this));
+						results=0;
+						return false;
+					}
+				});*/
+				var bomlist = new Array();
+				var trs=$("#grid_tbody").find("tr");
+				$.each(trs,function(){
+					var thisObj = $(this).find("input[name='materials.amount']");
+					var amount = $.trim($(this).find("input[name='materials.amount']").val());//出库数量
+					if (amount.length == 0) {
+						gener.tip("请输入移库数量!", $(thisObj));
+						results = 0;
+						return false;
+					}
+					if (!Common.IsIntThanZero(amount)) {
+					  gener.tip("移库数量需为正整数", $(thisObj));
+					  results = 0;
+					  return false;
+					}
+					var canuseamount = $.trim($(this).find("input[name='materials.useamount']").val());//可出口数量
+					if (Number(amount)>Number(canuseamount)) {
+						gener.tip("移库数量不能大于可出库数量！", $(thisObj));
+						results = 0;
+						return false;
+					}
+					var obj= {
+							"amount":$(this).find("[name='materials.amount']").val(),
+							"materialcode":$(this).find("[name='materials.materialcode']").val()};
+					bomlist.push(obj);
+				});
+				if(results==0){
+					return;
+				}
+				if(bomlist.length==0){
+					gener.tip("移库清单列表不能为空！");
+					return;
+				} 
+				gener.confirm("确认提交?",function(){
+					var info=$("#addform").serializeJson();
+					$.extend(info,{"bomlist":bomlist});
+					gener.ajaxPost("/AnTransferStock/ac_editfrom",info, function(result) {
+						if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+								// 刷新列表数据
+								$("#grid_check").flexReload();
+								$("#grid_in").flexReload();
+							});
+						}else {
+							gener.error(result.msg);
+							//gener.alert(result.msg);
+						}
+					});
+				});
+			}
+		},
+		
+		/**
+		 * 审核
+		 */
+		submit_checkfrom:function(){
+			if($("#addform").valid()){
+				if($.trim($("#suggestion").val())==""){
+					gener.alert("请填写审核意见");
+					return;
+				}
+				var currCheck = $("input[name='review.approveresult']:checked").val();
+				var resultInfo = currCheck==1?"您确定审核通过吗？":"您确定审核不通过？";
+				gener.confirm(resultInfo,function(){
+					var info=$("#addform").serializeJson();
+					gener.ajaxPost("/AnTransferStock/ac_checkfrom",info, function(result) {
+						if (result.state == 1) {
+							gener.success(result.msg, function() {
+								$(".btn-close").click();
+								// 刷新列表数据
+								$("#grid_check").flexReload();
+								$("#grid_in").flexReload();
+							});
+						}else {
+								gener.alert(result.msg);
+						}
+					});
+				});
+			}
+		},
+		
+		/**
+        * 入库单终止
+        */
+		termfrom:function(buyid){
+    	   gener.confirm("您确认终止该入库单!",function(){
+    		   gener.ajaxPost("/AnTransferStock/ac_termfrom",{"id":buyid}, function(result) {
+					if (result.state == 1) {
+						gener.success(result.msg, function() {
+							gener.dialogSuc();
+							antransferstock.search(1);
+							$("#grid_in").flexReload();
+						});
+					} else {
+						gener.error(result.msg);
+					}
+				});
+    	   });
+        },
+       
+        detailfrompop :function(id){
+            gener.dialog({
+                url : "/AnTransferStock/detailfrompop?id="+id,
+                title : "移库详情",
+                width : "80%",
+                height : "90%",
+                func : function() {
+                }
+            });
+        },
+       
+    };
+}();
+function warehouse(){
+	var outwhid = $("#outwhid").val();
+    var inwhid = $("#inwhid").val();
+    if (outwhid == inwhid) {
+    	gener.alert("调入仓库不能跟调出仓库一样！");
+    	$("#inwhid").val("");
+    	return;
+    }
+    $("#grid_tbody").html("");
+}
+
+
+//移库管理报表导出
+function ExportPurchaseList() {
+var info = $("#search-form").serializeJson();
+gener.ajaxPost("/AnTransferStock/exportPurcaseList",info,function(result){
+	if(result.state > 0 ){
+		gener.success("导出成功",function(){
+			window.location.href=dodownloadfile(result);
+		});
+	}else{
+		gener.error("导出失败!"); 
+	}
+});
+};

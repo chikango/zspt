@@ -1,0 +1,1058 @@
+var batchgoin=false;
+var anarrivalanddelivery = function() {
+	var gridtable=function(name,dofuc,typename){
+		if($("#grid_"+name).size() > 0){
+			$("#grid_"+name).flexigrid({
+				url : '/AnArrivalAndDelivery/search',
+				extParam:$("#search-form-grid_"+name).serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : '10',
+				},{
+					display : 'id',
+					name : 'id',
+					hide : true,
+				},{
+					display : typename+'单号',
+					name : 'adcode',
+					width : 40,
+				},{
+					display : typename+'仓库',
+					name : 'whname',
+					width : 60,
+				},{
+					display : '来源类型',
+					name : 'sendfromtypename',
+					width : 40,
+				},{
+					display : '来源单号',
+					name : 'fromno',
+					width : 40,
+				},{
+					display : '创建人',
+					name : 'createusername',
+					width : 40,
+				},{
+					display : '创建时间',
+					name : 'createtime',
+					width : 100,
+				},{
+					display : '状态',
+					name : 'adstateShowHtml',
+					width : 40,
+				},{
+					display : '操作',
+					name : 'actions',
+					width : 70,
+				}],
+				minColToggle : 1,
+				onrowclick : false,
+				usepager : true,
+				useRp : true,
+				sortname : "createtime",
+				sortcollection : "asc",
+				rp : 15,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : dofuc
+			});
+		}
+
+	}
+	function processData(cell,i){//公共回调
+			cell.sno=i+1;
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd HH:mm:ss");
+			}
+		cell.actions="";
+
+	};
+	//质检
+	var loaddata_zhijian = function(){
+		gridtable("zhijian",processData_zhijian,"到货");
+	};
+	function processData_zhijian(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161406", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/arrivaldetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if (cell.processtype==1&&$.checkAuth("161504", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/arrivalPickCheck?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-warning btn-outline'><i class='fa fa-edit'></i> 质 检</a>";
+			}
+		}
+		return data;
+	};
+	var search_zhijian = function(pageIndex){
+		$.searchFlexgrid($('#grid_zhijian'), pageIndex);
+	};
+	//到货确认
+	var loaddata_daocheck = function(){
+		gridtable("daocheck",processData_daocheck,"到货");
+	};
+	function processData_daocheck(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161406", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/arrivaldetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if (cell.processtype==1&&$.checkAuth("161405", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/arrivalInConfirm?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-primary btn-outline'><i class='fa fa-truck'></i> 到货确认</a>";
+			}
+		}
+		return data;
+	};
+	var search_daocheck = function(pageIndex){
+		$.searchFlexgrid($('#grid_daocheck'), pageIndex);
+	};
+	//到货记录
+	var loaddata_daorecod = function(){
+		gridtable("daorecod",processData_daorecod,"到货");
+	};
+	function processData_daorecod(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161406", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/arrivaldetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+		}
+		return data;
+	};
+	var search_daorecod = function(pageIndex){
+		$.searchFlexgrid($('#grid_daorecod'), pageIndex);
+	};
+
+
+	//------发货---------------
+	//拣配
+	var loaddata_jianpei = function(){
+		gridtable("jianpei",processData_jianpei,"发货");
+	};
+	function processData_jianpei(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161506", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/deliverydetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if (cell.processtype==1&&$.checkAuth("161504", data.authIds)) {
+				if (cell.operatstate==0) {
+					cell.actions+= "<a class='btn btn-xs btn-success btn-outline' onclick='anarrivalanddelivery.startPick("+cell.adid+",1);'><i class='fa fa-play'></i>开始拣配</a>";
+				}else{
+					cell.actions+= "<a class='btn btn-xs btn-default btn-outline' onclick='anarrivalanddelivery.startPick("+cell.adid+",0);'><i class='fa fa-play'></i>取消拣配</a>";
+					cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/deliverPickCheck?adid="
+						+ cell.adid
+						+ "\");' class='btn btn-xs btn-warning btn-outline'><i class='fa fa-edit'></i> 拣配</a>";
+				}
+			}
+		}
+		return data;
+	};
+	var search_jianpei = function(pageIndex){
+		$.searchFlexgrid($('#grid_jianpei'), pageIndex);
+	};
+	//发货确认
+	var loaddata_fahuocheck = function(){
+		gridtable("fahuocheck",processData_fahuocheck,"发货");
+	};
+	function processData_fahuocheck(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161506", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/deliverydetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+			if (cell.processtype==1&&$.checkAuth("161505", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/deliveryOutConfirm?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-primary btn-outline'><i class='fa fa-truck'></i> 发货确认</a>";
+			}
+		}
+		return data;
+	};
+	var search_fahuocheck = function(pageIndex){
+		$.searchFlexgrid($('#grid_fahuocheck'), pageIndex);
+	};
+	//发货记录
+	var loaddata_fahuorecord = function(){
+		gridtable("fahuorecord",processData_fahuorecord,"发货");
+	};
+	function processData_fahuorecord(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			processData(cell,i);
+			if ($.checkAuth("161506", data.authIds)) {
+				cell.actions += "<a onclick='ajaxHtml(this,\"/AnArrivalAndDelivery/deliverydetail?adid="
+					+ cell.adid
+					+ "\");' class='btn btn-xs btn-success btn-outline'><i class='fa fa-eye'></i> 详情</a>";
+			}
+		}
+		return data;
+	};
+	var search_fahuorecord = function(pageIndex){
+		$.searchFlexgrid($('#grid_fahuorecord'), pageIndex);
+	};
+
+	var loaddeliverbom=function (option,adtype) {
+		gener.ajaxPost("/AnArrivalAndDelivery/loaddeliverbom",{"adid":$("#adid").val()}, function(result) {
+			if (result.state == 1) {
+				let bomhtml="";
+				let boms=result.msg;
+				if (boms != null&&boms.length>0) {
+					for(var i = 0;i<boms.length;i++){
+						let bomInfo=boms[i];
+						let childselect="";
+						let onchangehtml="";
+						let arrivalhtml="";
+						let actionhtml="";
+						var resulthtml="";
+						let deliv_one="";
+						debugger;
+						if (option=='view'||bomInfo.ifmainmaterial!=1) {//加载选择子料号
+							childselect+=bomInfo.childmaterialcode+"<input name=\"detailList["+i+"].childmaterialcode\"  id='selectchild_"+bomInfo.materialcode+"' type=\"hidden\" value=\""+bomInfo.childmaterialcode+"\">";
+						}else{
+							if (bomInfo.ifmainmaterial==1){
+								childselect+="<select class=\"selectpicker childmaters form-control\" "+onchangehtml+" id='selectchild_"+bomInfo.materialcode+"' style=\"width:100%;text-align-last:center;\" name=\"detailList["+i+"].childmaterialcode\">";
+								let childList=bomInfo.childList;
+								let opthtml="";
+								if (childList != null&&childList.length>0) {
+									opthtml+="<option value=\"\" >请选择</option>";
+									for(var d = 0;d<childList.length;d++){
+										let childinfo=childList[d];
+										if(childinfo.materialcode==bomInfo.childmaterialcode){
+											opthtml+="<option value=\""+childinfo.materialcode+"\" selected>"+childinfo.materialcode+"_"+childinfo.materialname+"</option>";
+										}else{
+											opthtml+="<option value=\""+childinfo.materialcode+"\">"+childinfo.materialcode+"_"+childinfo.materialname+"</option>";
+										}
+									}
+
+								}
+								childselect+=opthtml+"</select>";
+							}
+						}
+
+						if (adtype=="arrival"){//加载质检物料
+							actionhtml+="<td>";
+							arrivalhtml+="<td><input style=\"text-align: center;\" type=\"text\" name=\"detailList["+i+"].badnum\" id=\"badnum_"+bomInfo.materialcode+"\" class=\"form-control badnuminput\"" +
+									"value=\""+bomInfo.badnum+"\"  oninput = \"value=value.replace(/[^\\d]/g,'')\"></td>" +
+									"<td><input style=\"text-align: center;\" type=\"text\" name=\"detailList["+i+"].scrapnum\" id=\"scrapnum_"+bomInfo.materialcode+"\" class=\"form-control scrapnuminput\"" +
+									"value=\""+bomInfo.scrapnum+"\"  oninput = \"value=value.replace(/[^\\d]/g,'')\"></td>";
+							if(bomInfo.usebatchstate==1&&option=='inconfirm'){
+								actionhtml+="<a onclick='anarrivalanddelivery.changebatch(\""+bomInfo.materialcode+"\")' class=\"btn btn-sm btn-success\"> 选择批次 </a>" +
+									"<input   id='selectbatchid_"+bomInfo.materialcode+"' type=\"hidden\" value=\"\">";
+							}
+							actionhtml+="</td>";
+							if (bomInfo.remark==null){
+								bomInfo.remark="";
+							}
+							if (option=='view'||option=='inconfirm'||$("#allowchg").val()=="false"){
+								resulthtml+="<td>"+bomInfo.resultstatename+"</td><td>"+bomInfo.remark+"</td>";
+							} else {
+								resulthtml+="<td><select style=\"width:100%;\" name=\"detailList["+i+"].resultstate\">" +
+									"<option value='1' "+(bomInfo.resultstate==1?"selected":"")+">合格</option>" +
+									"<option value='0' "+(bomInfo.resultstate==0?"selected":"")+">不合格</option>" +
+									"</select></td>"+
+									"<td><input class=\"form-control\" name=\"detailList["+i+"].remark\" type=\"text\" value=\""+bomInfo.remark+"\"></td>";
+							}
+						}else if (adtype=="deliver"){
+							// if(bomInfo.usebatchstate==1){
+							onchangehtml+="onchange='anarrivalanddelivery.loadbatchbom(\""+adtype+"\",\""+bomInfo.materialcode+"\")'";
+							// }
+							deliv_one="<td >"+" <a class='toggleTr'><i class='fa fa-minus-square-o'></a>"+"</td>";
+						}
+
+
+						bomhtml+="<tr class=\"bominfo\" linnumb='"+(i+1)+"' id='bom_"+bomInfo.materialcode+"'>" +
+							deliv_one +
+							"<td >"+(i+1)+"</td>" +
+							"<td >"+bomInfo.materialcode+"<input name=\"detailList["+i+"].detailid\" type=\"hidden\" value=\""+bomInfo.detailid+"\"></td>" +
+							
+							"<td>"+bomInfo.materialname+"</td>" +
+							"<td>"+bomInfo.groupname+"</td>" +
+							"<td style=\"text-align: center;\">" +
+							childselect+
+							"<td>"+bomInfo.applyamount+"<input name=\"detailList["+i+"].applyamount\" type=\"hidden\" value=\""+bomInfo.applyamount+"\"></td>" +
+							"<td><input style=\"text-align: center;\" type=\"text\" name=\"detailList["+i+"].actamount\" id=\"actamount_"+bomInfo.materialcode+"\" class=\"form-control actamountinput\"" +
+							"value=\""+bomInfo.actamount+"\" "+onchangehtml+" oninput = \"value=value.replace(/[^\\d]/g,'')\"></td>" +
+							
+							arrivalhtml+
+							"<td>"+bomInfo.materialunit+"</td>" +
+							// actionhtml+
+							resulthtml+
+							"</tr>";
+					}
+
+				}
+
+				$("#gobom").html(bomhtml);
+				if ($("#allowchg").val()=="false"||option=='inconfirm'){//数量不允许修改
+					// $(".actamountinput").attr("readonly","readonly");
+					$(".scrapnuminput").attr("readonly","readonly");
+					// $(".badnuminput").attr("readonly","readonly");
+				}
+				debugger;
+				// if (adtype=="deliver"){
+					if (option=='view') {
+						loadbatchdetail(function () {
+                            $("#gobom").find("input").attr("disabled","disabled");
+                        },adtype);
+
+					}else{
+						if (option=='arrpick') {
+							// if ($("#sendfromtype").val()!="220") {//退货才允许填不良品
+							// 	$(".badnuminput").attr("readonly","readonly");
+							// }
+						}else if (option=='inconfirm') {
+							$(".actamountinput").attr("readonly","readonly");
+							$(".scrapnuminput").attr("readonly","readonly");
+							anarrivalanddelivery.loadbatchbom(adtype);//加载批次BOM
+						}else {
+							anarrivalanddelivery.loadbatchbom(adtype);//加载批次BOM
+						}
+					}
+				// }
+
+			}else {
+				$("#deliverbom").html(result.msg);
+			}
+		// 假如没有子组件则不显示加号
+		$('.bominfo').each(function(index,elem){	
+			if(!$(elem).next().hasClass('batchtr')){
+				$(elem).find('.toggleTr').addClass('hide')
+			}
+			})
+			
+		});
+
+
+	};
+
+	var loadBatchHtml=function(returndetail,adtype){
+		if (returndetail != null&&returndetail.length>0) {
+			debugger;
+			var u=$(".usebatch").length;
+			for(var i = 0;i<returndetail.length;i++){
+				var batchList=returndetail[i].useBatchList;
+				var allbatch=returndetail[i].allbatch;
+				if (batchList!=null&&batchList.length>0) {
+					var parentobj=$("#bom_"+returndetail[i].materialcode);
+					var linnumb=parentobj.attr("linnumb");//行号
+					var parenti=parseInt(linnumb)-1;
+					if (!parentobj.next().hasClass("batchtr")) {//判断是否存在
+						parentobj.after("<tr class='batchtr'>" +
+							"<td  colspan=\""+$("#bomhead").find("th").length+"\" style=\"padding:0\">" +
+							"<table style=\"table-layout:fixed\" class=\"table-hover form\"  id=\"usebatch_"+returndetail[i].materialcode+"\">" +
+							"</table></td></tr>");
+					}
+					var bomhtml="";
+					var batchobj=$("#usebatch_"+returndetail[i].materialcode);
+					for(var b=0;b<batchList.length;b++){
+						var bomInfo=batchList[b];
+						var childselect="";
+						var quatitychg="";
+						var canusehtml="";
+						let arrivalempthtml="";
+						let arrivalRemarkthtml="";
+						let deliv_one="";
+						if (adtype=="deliver") {
+							if (allbatch != null&&allbatch.length>0) {//如果有批次选项
+								childselect+="<select class=\"selectpicker form-control\" onchange='anarrivalanddelivery.chgbatch(this)' style=\"width:100%;text-align-last:center\" name=\"batchlist["+u+"].batchid\">";
+								var opthtml="";
+								for(var d = 0;d<allbatch.length;d++){
+									var batch=allbatch[d];
+									var datathtml="whname='"+batch.whname+"' allowamount='"+batch.allowamount+"' batchno='"+batch.batchno+"'";
+									if(batch.batchid==bomInfo.batchid){
+										opthtml+="<option value=\""+batch.batchid+"\" "+datathtml+"selected>"+batch.batchno+"_"+batch.allowamount+"</option>";
+									}else{
+										if (batch.allowamount<bomInfo.quantity){
+											opthtml+="<optgroup value=\""+batch.batchid+"\" "+datathtml+">"+batch.batchno+"_"+batch.allowamount+"</optgroup>";
+										}else {
+											opthtml+="<option value=\""+batch.batchid+"\" "+datathtml+">"+batch.batchno+"_"+batch.allowamount+"</option>";
+										}
+									}
+								}
+								childselect+=opthtml+"</select>";
+							}else{
+								childselect+=bomInfo.batchno+"<input name=\"detailList["+u+"].batchid\"  type=\"hidden\" value=\""+bomInfo.batchid+"\">";
+							}
+							childselect+="<input style=\"text-align: center;\" type=\"hidden\" name=\"batchlist["+u+"].batchno\" class=\"form-control gobatchno\"" +
+								"value=\""+bomInfo.batchno+"\" >";
+							canusehtml+="<th width=\"8%\" class=\"text-right\">批次可用 ：</th>" +
+								"<td width=\"6%\" style=\"text-align: center;\" class='canusetd'>" +bomInfo.allowamount+
+								"</td>" ;
+							deliv_one="<td width=\"41px\">"+""+"</td>";
+						}else {
+							childselect+="<input style=\"text-align: center;\" type=\"text\" id='selectbatchno_"+returndetail[i].materialcode+"' name=\"batchlist["+u+"].batchno\" class=\"form-control\"" +
+								"value=\""+bomInfo.batchno+"\" >";
+							quatitychg+="readonly";//入批次数量不允许修改
+							arrivalempthtml="<td class=\"\" width=\"80px \">----</td>";
+							arrivalRemarkthtml="<td class=\"\" >----</td>";
+						}
+
+
+						bomhtml+="<tr class=\"bominfo usebatch\">" +
+							deliv_one +
+							"<td width=\"42px\">"+linnumb+"."+(b+1)+"</td>" +
+							"<td width=\"120px\"><input style=\"text-align: center;\" type=\"text\" readonly name=\"batchlist["+u+"].materialcode\" class=\"form-control\"" +
+							"value=\""+bomInfo.materialcode+"\" ></td>" +
+							"<td class=''>"+"------------------------"+"</td>" +
+							"<td class='' width=\"80px \">"+"----"+"</td>" +
+
+							"<td width=\"180px\" style=\"text-align: center;\">" +
+							childselect+
+							"</td>" +
+							arrivalempthtml+
+							"<td width=\"80px\"><input style=\"text-align: center;\" type=\"text\" name=\"batchlist["+u+"].quantity\" class=\"form-control\"" +
+							"value=\""+bomInfo.quantity+"\" "+quatitychg+" oninput = \"value=value.replace(/[^\\d]/g,'')\"></td>" +
+
+							"<td class='' width=\"80px\">"+"----"+"</td>" +
+							arrivalempthtml+
+							"<td width=\"41px\">"+returndetail[i].materialunit+"</td>" +
+							arrivalempthtml+arrivalRemarkthtml+
+							"</tr>";
+						u++;
+					}
+					batchobj.html(bomhtml);
+
+					// 假如没有子组件则不显示加号
+					$('.bominfo').each(function(index,elem){	
+						if($(elem).next().hasClass('batchtr')){
+							$(elem).find('.toggleTr').removeClass('hide')
+						}
+					})
+
+				}
+			}
+
+		}
+		$("#deliverbom").html(bomhtml);
+	}
+	var loadbatch=function(adtype,materialcode){
+		if (batchgoin) {
+			gener.alert("手速太快，请稍后再试！");
+		}
+		batchgoin=true;
+		var comodl;
+		debugger;
+		if (materialcode==null){
+			comodl={"adid":$("#adid").val()}
+		} else {
+			comodl={"adid":$("#adid").val(),
+				"detailInfo.childmaterialcode":$("#selectchild_"+materialcode).val(),
+				"detailInfo.materialcode":materialcode,
+				"detailInfo.actamount":$("#actamount_"+materialcode).val(),
+				"detailInfo.batchid":$("#selectbatchid_"+materialcode).val(),
+				"detailInfo.batchno":$("#selectbatchno_"+materialcode).val()}
+		}
+		gener.ajaxPost("/AnArrivalAndDelivery/loaddeliverbatch",comodl, function(result) {
+			if (result.state == 1) {
+				debugger;
+				let returndetail=result.msg;
+				loadBatchHtml(returndetail,adtype);
+			}else {
+				gener.alert(result.msg);
+			}
+			batchgoin=false;
+		});
+	}
+	var loadbatchdetail=function(callbackfunc,adtype){
+		gener.ajaxPost("/AnArrivalAndDelivery/loadBatchByAd",{"adid":$("#adid").val()}, function(result) {
+			if (result.state == 1) {
+				var returndetail=result.msg;
+				loadBatchHtml(returndetail,adtype);
+                callbackfunc();
+			}else {
+				gener.alert(result.msg);
+			}
+		});
+	}
+	var out_pickcheck=function(){
+		debugger;
+		var havenull=null;
+		$(".childmaters").each(function(){
+			if ($(this).val()==""){
+				havenull=$(this);
+				return;
+			}
+		})
+		if (havenull!=null){
+			return returnerro("请选择子料号",havenull);
+		}
+		return true;
+	}
+	/**
+	 * 拣配提交
+	 * @param option
+	 */
+	var submit_pickupCheck=function(option){
+		if (out_pickcheck()&&(option!="submit"||checklogis())) {
+			if (option=="submit") {
+				gener.confirm("您确认提交拣配吗?",function(){
+					common_submitpickup(option);
+				})
+			}else{
+				common_submitpickup(option);
+			}
+		}
+	}
+
+	//拣配提交公共方法
+	var common_submitpickup=function(option){
+		var info=$("#addform").serializeJson();
+		gener.ajaxPost("/AnArrivalAndDelivery/ac_submitpickCheck",{"info":info,"info.optionstr":option},function(result){
+			if(result.state>0){
+				gener.success(result.msg, function() {
+					$(".btn-close").click();
+					flexReloadfahuo();
+				});
+			}else{
+				gener.alert(result.msg);
+			}
+		});
+	}
+	var submit_arrivalpickupCheck=function(option){
+		if (option=="submit") {
+			gener.confirm("您确认提交质检结果吗?",function(){
+				common_arrivalpickupCheck(option);
+			})
+		}else{
+			common_arrivalpickupCheck(option);
+		}
+	}
+	//质检提交公共方法
+	var common_arrivalpickupCheck=function(option){
+		debugger;
+		var info=$.extend( {},$("#addform").serializeJson(), $("#detailform").serializeJson());
+		gener.ajaxPost("/AnArrivalAndDelivery/ac_submitarrivalPickCheck",{"info":info,"info.optionstr":option},function(result){
+			if(result.state>0){
+				gener.success(result.msg, function() {
+					$(".btn-close").click();
+					flexReloaddao();
+				});
+			}else{
+				gener.alert(result.msg);
+			}
+		});
+	}
+	var returnerro=function(messg,obj){
+		if (obj!=null) {
+			gener.tip(messg,obj);
+		}else {
+			gener.tip(messg);
+		}
+		return false;
+	}
+	var checklogis=function(){
+		var logitype=$('input[name="logistictype"]:checked').val();
+		if (logitype==1) {
+			if ($.trim($("#receivename").val())==""){
+				return returnerro("司机姓名必填");
+			}
+			if ($.trim($("#receiveidcard").val())==""){
+				return returnerro("司机身份证必填");
+			}
+			if ($.trim($("#receivephonecode").val())==""){
+				return returnerro("司机电话必填");
+			}
+		}else if(logitype==2){
+			if ($.trim($("#consigneename").val())==""){
+				return returnerro("收货人姓名必填");
+			}
+			if ($.trim($("#consigneephone").val())==""){
+				return returnerro("收货人电话必填");
+			}
+			if ($.trim($("#consigneeaddress").val())==""){
+				return returnerro("收货地址必填");
+			}
+		}else if (logitype==3){
+			if ($.trim($("#logisticcode").val())==""){
+				return returnerro("物流单号必填");
+			}
+			if ($.trim($("#logisticsunit").val())==""){
+				return returnerro("物流单位必填");
+			}
+		}
+		if ($.trim($("#receivecarcode").val())==""){
+			return returnerro("车牌号必填");
+		}
+		return true;
+	}
+	var incomfirmcheck=function(){
+		if ($("#daohpz").length>0&&$("#daohpz").find("li").length==0 ) {
+			return returnerro("请上传到货凭证");
+		}
+		if ($("#badwhid").length>0&&$.trim($("#badwhid").val())=="" ) {
+			return returnerro("请选择不良品入库仓库");
+		}
+		return true;
+	}
+	var outcomfirmcheck=function(){
+		if ($("#fahpz").length>0&&$("#fahpz").find("li").length==0 ) {
+			return returnerro("请上传发货凭证");
+		}
+		// if ($("#badwhid").length>0&&$.trim($("#badwhid").val())=="" ) {
+		// 	return returnerro("请选择不良品入库仓库");
+		// }
+		return true;
+	}
+	/**
+	 * 发货确认提交
+	 * @param option
+	 */
+	var submit_outConfirm=function(option){
+		if (option=="directgo") {
+			ac_dooutConfirm("return");
+		}else {
+			if (option!="check"||checklogis()&&outcomfirmcheck()) {
+				if(option=="return"){
+					gener.dialog({
+						url : "/AnArrivalAndDelivery/returndomessg?info.inouttype=1",
+						title : "选择发货退回原因",
+						width : "300%",
+						height : "30%",
+						func : function() {
+						}
+					});
+				}else {
+					var oname=option=='return'?'退回':'确认发货';
+					gener.confirm("您确认"+oname+"吗?",function(){
+						ac_dooutConfirm(option);
+					});
+				}
+
+			}
+		}
+
+	}
+	/**
+	 * 到货确认提交
+	 * @param option
+	 */
+	var submit_inConfirm=function(option){
+		if (option=="directgo") {
+			ac_doinConfirm("return");
+		}else {
+			if (option!="check"||incomfirmcheck()) {
+				if(option=="return"){
+					gener.dialog({
+						url : "/AnArrivalAndDelivery/returndomessg?info.inouttype=2&doaction=''",
+						title : "选择到货退回原因",
+						width : "50%",
+						height : "30%",
+						func : function() {
+						}
+					});
+				}else {
+					var oname = option == 'return' ? '退回' : '确认收货';
+					gener.confirm("您确定" + oname + "吗?", function () {
+						ac_doinConfirm(option);
+					});
+				}
+			}
+		}
+	}
+	var ac_dooutConfirm=function (option) {
+		var info=$("#addform").serializeJson();
+		gener.ajaxPost("/AnArrivalAndDelivery/ac_OutConfirm",{"info":info,"info.optionstr":option},function(result){
+			if(result.state>0){
+				gener.success(result.msg, function() {
+					$(".btn-close").click();
+					flexReloadfahuo();
+				});
+			}else{
+				gener.alert(result.msg);
+			}
+		});
+	}
+	var ac_doinConfirm=function(option){
+		var info=$.extend( {},$("#addform").serializeJson(), $("#detailform").serializeJson());
+		debugger;
+		gener.ajaxPost("/AnArrivalAndDelivery/ac_InConfirm", {
+			"info": info,
+			"info.optionstr": option
+		}, function (result) {
+			if (result.state > 0) {
+				gener.success(result.msg, function () {
+					$(".btn-close").click();
+					flexReloaddao();
+				});
+			} else {
+				gener.alert(result.msg);
+			}
+		});
+	}
+	var flexReloadfahuo=function(){
+		$("#grid_jianpei").flexReload();
+		$("#grid_fahuocheck").flexReload();
+		$("#grid_fahuorecord").flexReload();
+	}
+	var flexReloaddao=function(){
+		$("#grid_zhijian").flexReload();
+		$("#grid_daocheck").flexReload();
+		$("#grid_daocheck").flexReload();
+	}
+	var newupload=function(obj,name){
+		fileupdown.onlyupload($(obj).attr("id"),1,function(data){
+			var order = $(".links li").length;
+			$("#"+$(obj).attr("viewid")).append("<li  style='margin-left:0px'"
+				+ "documentid='" + data.fileid + "' "
+				+ "id='imageLink"+order+"'>"
+				+ "<img style='width:42px;height:42px;' data-original='" + data.litimgpath + "' "
+				+ "src='" + data.litimgpath + "' "
+				+ "alt='" + data.filename + "' >"
+				+ "<input type='hidden' name='"+$(obj).attr("uploadname")+"'" +
+				" value='"+data.fileid+"'/>"
+				+ "<a onclick='anarrivalanddelivery.newdelpicture(this,"+data.fileid+")'><i class='fa fa-minus-circle'></i></a>"
+				+"</li>");
+			$(".docs-pictures").viewer("destroy").viewer({
+				url: "data-original"
+			});
+			$("#file").val("");
+		});
+	}
+	var newdelpicture=function(obj,documentid){
+		debugger
+		if(documentid!=null){
+			gener.ajaxPost("/FileUpDown/ac_delfile",{ "documentid":documentid },function(result){
+				if(result!=null){
+					if(result.state==1){
+						gener.success(result.msg,function(){
+							var curli = $(obj).parent("li");
+							curli.remove();
+						});
+					}else{
+						gener.error(result);
+					}
+				}else{
+					gener.error("系统异常！");
+				}
+			});
+		}
+	}
+	var changebatch=function(materialcode){//弹框选择批次
+		gener.dialog({
+			url : "/AnArrivalAndDelivery/changebatch?info.whid="+$("#whid").val()+"&info.materialcode="+$("#selectchild_"+materialcode).val()+"&info.mainmaterialcode=" + materialcode,
+			title : "选择批次",
+			width : "88%",
+			height : "88%",
+			func : function() {
+			}
+		});
+	}
+
+	// var deliverydetail=function(adid){//弹框选择批次
+	// 	gener.dialog({
+	// 		url : "/AnArrivalAndDelivery/arrianddelivdetail_dochild?adid=" + adid,
+	// 		title : "发货详情",
+	// 		width : "95%",
+	// 		height : "98%",
+	// 		func : function() {
+	// 		}
+	// 	});
+	// }
+	var arrianddelivdetail=function(adid){//弹框选择批次
+		gener.dialog({
+			url : "/AnArrivalAndDelivery/arrianddelivdetail_dochild?adid=" + adid,
+			title : "到发货详情",
+			width : "95%",
+			height : "98%",
+			func : function() {
+			}
+		});
+	}
+	var chgbatch=function(obj){//下拉选择批次
+		debugger;
+		$(obj).parent().parent().find(".canusetd").html($(obj).find("option:selected").attr("allowamount"));
+		$(obj).parent().find(".gobatchno").val($(obj).find("option:selected").attr("batchno"));
+	}
+	var loaddatabatch=function () {
+		if ($("#grid_batch").size() > 0) {
+			$("#grid_batch").flexigrid({
+				url : '/AnArrivalAndDelivery/searchBatch',
+				extParam : $("#search-form-grid_batch").serializeJson(),
+				dataType : 'json',
+				colModel : [ {
+					display : '序号',
+					name : 'sno',
+					width : 30,
+				},{
+					display:"仓库名称",
+					name:"whname",
+					width:80,
+				},{
+					display:"物料编码",
+					name:"materialcode",
+					width:60,
+				},{
+					display:"批次编号",
+					name:"batchno",
+					width:60,
+				},{
+					display:"来源类型",
+					name:"batchfromtypename",
+					width:50,
+				},{
+					display:"来源单号",
+					name:"fromno",
+					width:50,
+				},{
+					display:"期初总量",
+					name:"fromstock",
+					width:50,
+				},{
+					display:"占用总量",
+					name:"occpucy",
+					width:50,
+				},{
+					display:"批次库存",
+					name:"batchstock",
+					width:50,
+				},{
+					display:"创建时间",
+					name:"createtime",
+					width:70,
+				}, {
+					display : '操作',
+					name : 'actions',
+					width : 80,
+				} ],
+				minColToggle : 1,
+				onrowclick : false,
+				sortname : "materialid",
+				sortcollection : "asc",
+				usepager : true,
+				useRp : true,
+				rp : 10,
+				resizable : false,
+				width : 'auto',
+				height : 'auto',
+				autoload : true,
+				singleSelect : true,
+				specify : true,
+				striped : true,
+				showcheckbox : false,
+				showToggleBtn : true,
+				mutliSelect : false,
+				preProcess : processData_batch
+			});
+		}
+	}
+	function processData_batch(data){
+		for (var i = 0; i<data.rows.length;i++){
+			var cell = data.rows[i].cell;
+			cell.sno = i + 1;
+			if (cell.createtime != null) {
+				cell.createtime = new Date(cell.createtime).format("yyyy-MM-dd");
+			}
+			cell.canuse=cell.batchstock-cell.occpucy;
+			cell.actions = "<button class=\"btn btn-sm btn-white\" onclick='anarrivalanddelivery.s_changeBatch("+cell.batchid+","+cell.batchno+")' type=\"submit\">选择</button>";
+			if(cell.batchfromtype == 1){
+				if (cell.fromno!=null){
+					cell.fromno="<a href=\"javascript:void(0);\" onclick=\"anarrivalanddelivery.arrianddelivdetail("+cell.fromid+")\">"+cell.fromno+"</a>";
+				}
+			}
+			cell.occpucy = "<a onclick='anstockmanagement.pickingquantity(1," + cell.stockid +",this,"+cell.batchid+")' title='批次占用明细'>" + cell.occpucy + " </a>";
+		}
+		return data;
+	};
+	var search_batch=function(pageIndex){
+		$.searchFlexgrid($('#grid_batch'), pageIndex);
+	}
+	var s_changeBatch=function (batchid,batchno) {
+		debugger;
+		parent.$("#selectbatchid_"+$("#mainmaterialcode").val()).val(batchid);
+		parent.$("#selectbatchno_"+$("#mainmaterialcode").val()).val(batchno);
+		gener.dialogClose();
+	}
+	
+	var printChoosegoodMsg = function(){
+		if(out_pickcheck()){
+			var info=$("#addform").serializeJson();
+			gener.ajaxPost("/AnArrivalAndDelivery/printChoosegoodnum",{"info":info},function(result){
+				debugger
+				if(result.state==1){
+					window.open("/AnArrivalAndDelivery/printCheckgoodMsg");
+				}
+			});
+		}
+		
+	}
+	var startPick=function(adid,operatstate){
+		var mesg="您确定开始拣配？";
+		if (operatstate==0){
+			mesg="您确定取消拣配？";
+		}
+		gener.confirm(mesg,function(){
+			gener.ajaxPost("/AnArrivalAndDelivery/chgoperatstate",{"adid":adid,"operatstate":operatstate}, function(result) {
+				if (result.state == 1) {
+					gener.success(result.msg, function() {
+						gener.dialogSuc();
+						anarrivalanddelivery.search_jianpei();
+					});
+				} else {
+					gener.error(result.msg);
+				}
+			});
+		});
+	}
+	
+	return {
+		init_zhijian:function(){
+			loaddata_zhijian();
+		},
+		search_zhijian:function(){
+			search_zhijian();
+		},
+		init_daocheck:function(){
+			loaddata_daocheck();
+		},
+		search_daocheck:function(){
+			search_daocheck();
+		},
+
+		init_daorecod:function(){
+			loaddata_daorecod();
+		},
+		search_daorecod:function(){
+			search_daorecod();
+		},
+
+		init_jianpei:function(){
+			loaddata_jianpei();
+		},
+		search_jianpei:function(){
+			search_jianpei();
+		},
+
+		init_fahuocheck:function(){
+			loaddata_fahuocheck();
+		},
+		search_fahuocheck:function(){
+			search_fahuocheck();
+		},
+
+		init_fahuorecord:function(){
+			loaddata_fahuorecord();
+		},
+		search_fahuorecord:function(){
+			search_fahuorecord();
+		},
+		loaddeliverbom:function(option){//加载BOM
+			loaddeliverbom(option,'deliver');
+		},
+		loadbatchbom:function(adtype,materialcode){//有启用批次要分配批次BOM
+			loadbatch(adtype,materialcode);
+		},
+		loadarrivalbom:function(option){//加载质检BOM
+			loaddeliverbom(option,'arrival');
+		},
+		submit_pickupCheck:function (option) {
+			submit_pickupCheck(option);
+		},
+		submit_outConfirm:function(option){
+			submit_outConfirm(option);
+		},
+		submit_inConfirm:function(option){
+			submit_inConfirm(option);
+		},
+		submit_arrivalpickupCheck:function(option){
+			submit_arrivalpickupCheck(option);
+		},
+		newupload:function(obj,name){
+			newupload(obj,name);
+		},
+		newdelpicture:function(obj,documentid){
+			newdelpicture(obj,documentid)
+		},
+		changebatch:function(materialcode){
+			changebatch(materialcode);
+		},
+		initbatch:function () {
+			loaddatabatch();
+		},
+		search_batch:function(){
+			search_batch();
+		},
+		s_changeBatch:function (batchid,batchno) {
+			s_changeBatch(batchid,batchno);
+		},
+		chgbatch:function (obj) {
+			chgbatch(obj);
+		},
+		arrianddelivdetail:function(adid){
+			arrianddelivdetail(adid);
+		},
+		
+		printpicklist:function(){
+			printChoosegoodMsg();
+		},
+		startPick:function(adid,operatstate){
+			startPick(adid,operatstate);
+		},
+		submit_messg:function(){
+			if($("#mssge").val()!=""){
+				parent.$("#domessg").val($("#mssge").val());
+				if ($("#inouttype").val()==2) {
+					parent.anarrivalanddelivery.submit_inConfirm("directgo");
+				}else if($("#inouttype").val()==1){
+					parent.anarrivalanddelivery.submit_outConfirm("directgo");
+				}
+				gener.dialogSuc();
+			}else {
+				gener.tip("请选择！",$("#mssge"));
+			}
+		}
+	}
+}();
+function exportPurchStockSendIndex(type){
+	var info = $("#search-form-grid_"+type).serializeJson();
+	gener.ajaxPost("/AnArrivalAndDelivery/exportStationReport",info,function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+				gener.dialogSuc();
+			});
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}
+function exportbomlist(adid){
+	gener.ajaxPost("/AnArrivalAndDelivery/exportbomlist",{"adid":adid},function(result){
+		if(result.state > 0 ){
+			window.location.href= dodownloadfile(result);
+			gener.success("导出成功",function(){
+			 });
+		}else{
+			gener.error("导出失败!"); 
+		}
+	});
+}
+

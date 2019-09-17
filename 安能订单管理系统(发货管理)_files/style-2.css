@@ -1,0 +1,1135 @@
+/*============================
+公共
+=============================*/
+
+/* 文本对齐 */
+.tar{text-align: right;}
+.tac{text-align: center;}
+
+
+/* 容器 */
+.content{padding: 15px 0;}
+
+/* 标题 */
+.title-pub{
+    padding: 10px 15px;
+    font-size: 16px;
+}
+/* 清除浮动 */
+.cf{*zoom: 1;}
+.cf:before,
+.cf:after{
+    display: table;
+    content: " ";
+}
+.cf:after{clear: both;}
+
+/* 浮动 */
+.fll{float: left;}
+.flr{float: right;}
+
+strong{color: #333;}
+/* 文字超出省略 */
+.ell{
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+/* 表单 */
+form{display: block;}
+form.pd15{padding-bottom: 1px;}
+
+/*================================
+缺陷隐患 详情
+================================*/
+
+/* 跟踪轨迹 */
+.track-line{}
+.track-line{
+    position: relative;
+    margin: 0;
+    padding: 20px 0;
+}
+.proc-menu .item:after,
+.proc-menu .item:before,
+.track-line li:before,
+.track-line li:after,
+.track-line:before{
+    display: block;
+    position: absolute;
+    content: "";
+}
+    .track-line:before{
+        left: 50px;top: 0;
+        width: 2px;
+        height: 100%;
+        background: #eee;
+    }
+.track-line li{
+    position: relative;
+    padding: 10px 10px 10px 100px;
+    margin: 0;
+    list-style: none;
+}
+    .track-line li:before{
+        left: 47px;top: 17px;
+        width: 8px;
+        height: 8px;
+        background: #f00;
+        border-radius: 50%;
+    }
+    .track-line li:after{
+        left: 65px;top: 12px;
+        width: 23px;
+        height: 18px;
+        background: url(../img/track-line-arrow.png) no-repeat;
+    }
+
+.track-line li .editer .name{
+    color: #337ab7;
+    font-weight: 700;
+}
+.track-line li .editer .unit{
+    margin-left: 5px;
+    font-size: 12px;
+    color: #999;
+}
+.track-line li .date{
+    font-size: 12px;
+    color: #999;
+}
+.track-line li .acts{
+    padding: 3px 0;
+    color: #333;
+}
+
+/*================================
+缺陷隐患 详情
+================================*/
+.proc-wrap{
+    position: relative;
+    padding-left: 260px;
+}
+.proc-menu{
+    position: absolute;
+    left: 60px;top: 0;
+    width: 201px;
+}
+.proc-menu .item{
+    position: relative;
+    margin-right: 1px;
+    padding: 10px 0 10px 15px;
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+}
+.proc-menu .item:after{
+    top: 50%;bottom: -1px;left: -42px;
+    width: 4px;
+    background: #ddd;
+}
+.proc-menu .item:before{
+    left: -50px;bottom: 50%;top: -1px;
+    width: 20px;
+    background: url(../img/proc-menu-arrow.png) no-repeat 0 bottom;
+    transform: translateY(-23px);
+    -webkit-transform: translateY(-23px);
+}
+.proc-menu .item:first-child:before,
+.proc-menu .item:last-child:after{display: none;}
+
+.proc-menu .item > span{display: block;}
+.proc-menu .item > span.snum{
+    position: absolute;
+    left: -60px;top: 50%;
+    margin-top: -25px;
+    width: 40px;
+    height: 40px;
+    background: #ddd;
+    border: 2px solid #f0f0f0;
+    border-radius: 50%;
+    font-size: 21px;
+    text-align: center;
+    line-height: 36px;
+    font-weight: 700;
+    color: #fff;
+    z-index: 10;
+}
+.proc-menu .item > span.name{
+    font-size: 16px;
+    font-weight: 700;
+    // color: #333;
+}
+.proc-menu .item > span.times{margin: 3px 0;}
+.proc-menu .item > span.opter font{
+    margin-left: 5px;
+    font-size: 12px;
+    color: #999;
+}
+.proc-menu .item + .item{margin-top: 15px;}
+
+.proc-menu .item.active{
+    margin-right: 0;
+    background: #fff;
+}
+.proc-menu .item.active > span.name{color: #1ab394;}
+.proc-menu .item.active > span.snum{background: #1ab394;}
+
+/*
+.proc-menu .item i{
+    display: block;
+    padding-top: 10px;
+    font-size: 24px;
+    line-height: 30px;
+    font-style: normal;
+    font-weight: 700;
+}
+.proc-menu .item.active{
+    background: #02a5d8;
+    color: #fff;
+    text-shadow: none;
+}
+.proc-menu .item.active:after{
+    display: block;
+    position: absolute;
+    left: 90px;top: 50%;
+    margin-top: -7px;
+    width: 8px;
+    height: 14px;
+    background: url(../img/proc-arrow.png) no-repeat;
+    content: " ";
+}
+*/
+.proc-main{
+    padding: 15px;
+    min-height: 350px;
+    background: #fff;
+    border: 1px solid #ddd;
+}
+
+/*================================
+表格表单
+================================*/
+table.form{width: 100%;}
+table.form > tbody > tr > th,
+table.form > tbody > tr > td{border: 1px solid #ddd;}
+table.form > tbody > tr > th{
+    padding: 6px!important;
+    background: #f8f8f8;
+    text-align: right;
+    vertical-align: middle!important;
+    line-height: 20px;
+    // color: #333;
+}
+table.form > tbody > tr > td > .val{
+    display: block;
+    padding: 8px 10px;
+    line-height: 20px;
+}
+table.form > tbody > tr > td.slt{padding: 0 10px;}
+table.form > tbody > tr > td.cks{padding: 5px 10px;}
+table.form > tbody > tr > td.cks > .radio-inline,
+table.form > tbody > tr > td.cks > .checkbox-inline{margin: 3px 10px 3px 0;}
+table.form > tbody > tr > td.cks.aline > .radio-inline,
+table.form > tbody > tr > td.cks.aline > .checkbox-inline{min-width: 10em;}
+table.form > tbody > tr > td .slt-plug{padding: 3px 7px 0 10px;}
+.files-bd{
+	background-color:white;	
+}
+.files-bd table td.ipt input[type="text"],
+table.form input[type="text"],
+table.form input[type="number"],
+table.form input[type="password"],
+table.form textarea,
+table.form select{
+    border: none;
+    width: 100%;
+}
+.files-bd table td.ipt input[type="text"],
+table.form input[type="text"],
+table.form input[type="number"],
+table.form input[type="password"]{
+    padding: 0 10px;
+    height: 36px;
+    line-height: 36px;
+}
+table.form textarea{
+    padding: 8px 10px;
+    height: 96px;
+    line-height: 20px;
+}
+table.form select{
+    height: 36px;
+    padding: 3px;
+    line-height: 30px;
+}
+
+.files-bd table td.ipt input[type="text"]:focus,
+table.form input[type="text"]:focus,
+table.form input[type="number"]:focus,
+table.form input[type="password"]:focus,
+table.form textarea:focus,
+table.form select:focus{
+    box-shadow: 0 0 4px rgba(12,178,230,.65);
+    outline: #0fadde solid 1px;
+}
+.form-buttons{
+    margin-top: 25px;
+    text-align: center;
+}
+.form-buttons .btn{min-width: 120px;}
+.form-buttons .btn + .btn{margin-left: 5px;}
+span.form-tip{
+    font-size: 12px;
+    color: #999;
+}
+.form-title{color: #333;}
+.form-title span{color: #999;}
+
+/* 附件 */
+.files-list{
+    
+}
+.files-hd{
+    position: relative;
+    padding: 0 10px;
+    background: #f2f2f2;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    overflow: hidden;
+}
+.files-hd h4{
+    margin: 0;
+    color: #333;
+    line-height: 30px;
+}
+.files-hd .opts{
+    position: absolute;
+    right: 10px;top: 50%;
+    transform: translateY(-50%);
+    -webkit-transform: translateY(-50%);
+}
+.files-bd table{width: 100%;}
+.files-bd table td,
+.files-bd table th{
+    text-align: center;
+    padding: 5px;
+    border: 1px solid #ddd;
+}
+.files-bd table td.ipt{padding: 0;}
+.files-bd table td input[type="file"]{display: inline-block;}
+
+/* 选人、选单位 */
+.slt-plug{
+    padding: 3px 0 0;
+    font-size: 0;
+}
+.slt-plug > a.slt-trg{
+    display: inline-block;
+    padding: 0 8px;
+    background: #02a5d8;
+    border-radius: 3px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 24px;
+    outline: none;
+}
+.slt-plug > a.slt-trg .fa{
+    position: relative;
+    top: -1px;
+    font-size: 12px;
+}
+.slt-plug > a.slt-trg:hover{background: #1a7bb9;}
+.slt-plug > span{
+    position: relative;
+    display: inline-block;
+    padding: 0 21px 0 6px;
+    margin: 0 3px 3px 0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 14px;
+    line-height: 22px;
+    white-space: nowrap;
+}
+.slt-plug > span a{
+    display: block;
+    position: absolute;
+    right: -1px;top: -1px;
+    width: 18px;
+    height: 24px;
+    border: 1px solid #dfdfdf;
+    border-radius: 0 3px 3px 0;
+    background: #fafafa;
+    text-align: center;
+    color: #e28888;
+    outline: none;
+}
+.slt-plug > span a:hover{
+    border-color: #cd6c6c;
+    background-color: #e28888;
+    color: #fff;
+}
+.slt-plug > span a:after{content: "×";}
+
+.slt-warp{
+    position: relative;
+    width: 480px;
+    height: 310px;
+    overflow: hidden;
+}
+
+.slt-warp-three{
+    position: relative;
+    width: 100%;
+    height: 310px;
+    overflow: hidden;
+}
+.slt-warp .hd,
+.slt-warp-three .hd{
+    padding: 0 10px;
+    height: 30px;
+    background: #f8f8f8;
+    border-bottom: 1px solid #e5e5e5;
+    line-height: 29px;
+}
+
+.slt-warp .slt-cont,
+.slt-warp .slt-tree,
+.slt-warp-three .slt-center,
+.slt-warp-three .slt-cont,
+.slt-warp-three .slt-tree{
+    position: absolute;
+    top: 0;
+    height: 310px;
+}
+.slt-warp .slt-tree{
+    left: 0;
+    width: 280px;
+}
+.slt-warp-three .slt-tree{
+    left: 0;
+    width: 40%;
+}
+.slt-warp .bd,
+.slt-warp-three .bd{
+    position: absolute;
+    left: 3px;top: 33px;bottom: 3px;right: 3px;
+    overflow: auto;
+}
+.slt-warp .slt-cont{
+    position: absolute;
+    right: 0;
+    width: 200px;
+    border-left: 1px solid #e5e5e5;
+}
+.slt-warp-three .slt-cont{
+    position: absolute;
+    right: 0;
+    width: 30%;
+    border-left: 1px solid #e5e5e5;
+}
+.slt-warp-three .slt-center{
+    position: absolute;
+    right: 30%;
+    width: 30%;
+    border-left: 1px solid #e5e5e5;
+}
+.slt-warp .slt-ed-chorg,
+.slt-warp .slt-ed,
+.slt-warp-three .slt-ed{
+    padding: 0;
+    margin: 0;
+}
+.slt-warp .slt-ed-chorg li,
+.slt-warp .slt-ed li,
+.slt-warp-three .slt-ed li{
+    padding: 5px 7px;
+    list-style: none;
+}
+.slt-warp .slt-ed li + li,
+.slt-warp .slt-ed-chorg li + li, 
+.slt-warp-three .slt-ed li + li{border-top: 1px dotted #eee;}
+.slt-warp .slt-ed li > a{
+    position: absolute;
+    right: 7px;top: 5px;
+}
+.slt-warp-three .slt-ed li > a,
+.slt-warp .slt-ed-chorg li > a{
+    position: absolute;
+    right: 7px;
+}
+.slt-warp .slt-buttons,
+.slt-warp-three .slt-buttons{
+    position: absolute;
+    left: 0;right: 0;bottom: 0;
+    padding: 10px;
+    height: 55px;
+    border-top: 1px solid #e5e5e5;
+    text-align: right;
+}
+.slt-warp .slt-buttons .btn,
+.slt-warp-three .slt-buttons .btn
+{min-width: 92px;}
+
+/*文件上传*/
+ .file {
+    position: relative;
+    display: inline-block;
+    background: #D0EEFF;
+    border: 1px solid #99D3F5;
+    border-radius: 4px;
+    padding: 4px 12px;
+    overflow: hidden;
+    color: #1E88C7;
+    text-decoration: none;
+    text-indent: 0;
+    line-height: 20px;
+    top:10px;
+}
+.file input  {
+    position: absolute;  
+    font-size: 1px;
+    right: 0;
+    top: 0;
+    opacity: 0;
+} 
+.file:hover {
+    background: #AADFFD;
+    border-color: #78C3F3;
+    color: #004974;
+    text-decoration: none;
+} 
+.upload-container{
+    box-shadow: 0px 2px 5px #ccc;
+    margin-bottom: 4px;
+}
+
+.upload-container-head {
+    padding: 0 8px;
+    line-height: 28px;
+    border-bottom: 1px solid #ebebeb;
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+    font-weight:550;
+    background-color:#fafafa;
+}
+.upload-container-body{
+	background-color:#fefefe;
+}
+.upload-container-body ul{
+	height: 70px;
+    overflow-y: auto;
+}
+.upload-container-body li{
+	margin:2px!important;
+}
+
+/*删除图片图标*/
+.bom-li .del_icon{
+   top: 6px;
+}
+
+.del_icon{
+	background: url(../images/close-btn.png)0px 0px no-repeat;
+    border: none;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    opacity: .8;
+}
+.del_icon:hover{
+	background:url("../images/close-btn.png")-16px 0px no-repeat;
+	opacity: 1;
+	}
+
+/**
+ * 目标指标管理
+ */
+
+/* 公用 */
+.spe-control-label {width:15.8888%;}
+
+.target-table .cell-highlight {color:#f00;}
+.target-table .cell-off {color:#999;}
+.target-table .cell-current {color:#00f;}
+.target-table .cell-wrap {word-break:break-all;word-wrap:break-word;}
+.target-table > thead > tr > th, .target-table > tbody > tr > td {
+	text-align: center;
+	word-wrap: break-word; word-break: break-all; /* 自动换行（中英文） */
+}
+.target-table input {text-align:center;}
+
+
+/* 目标值设定表格 */
+.target-value-table .col-1 {min-width:50px; width:4%;}
+.target-value-table .col-2 {width:18%;}
+.target-value-table .col-3 {width:7%;}
+.target-value-table .col-4 {width:8%;}
+/* .target-value-table .col-5 {width:26%;} */
+.target-value-table .col-6 {width:8%;}
+.target-value-table .col-7 {width:5%;}
+.target-value-table .col-8 {min-width:80px; width:10%;}
+.target-value-table .col-9 {min-width:80px; width:10%;}
+.target-value-table .col-10 {width:5%;}
+/* 月度值设定表格 */
+.target-value-month-table .col-1 {min-width:47px; width:47px;}
+.target-value-month-table .col-2 {min-width:75px; width:75px;}
+.target-value-month-table .col-3 {min-width:150px;}
+.target-value-month-table .col-4 {min-width:65px;}
+.target-value-month-table .col-5 {min-width:65px;}
+.target-value-month-table .col-6 {min-width:65px;}
+.target-value-month-table .col-7 {min-width:65px;}
+.target-value-month-table .col-8 {min-width:65px;}
+.target-value-month-table .col-9 {min-width:65px;}
+.target-value-month-table .col-10 {min-width:65px;}
+.target-value-month-table .col-11 {min-width:65px;}
+.target-value-month-table .col-12 {min-width:65px;}
+.target-value-month-table .col-13 {min-width:65px;}
+.target-value-month-table .col-14 {min-width:65px;}
+.target-value-month-table .col-15 {min-width:65px;}
+.target-value-month-table .col-16 {min-width:65px;}
+.target-value-month-table .col-17 {min-width:90px;}
+.target-value-month-table .col-18 {min-width:65px;}
+/* 月度指标综合查询 */
+.target-month-search-table .col-1 {width:5%;}
+.target-month-search-table .col-2 {width:16%;}
+.target-month-search-table .col-3 {width:6%;}
+.target-month-search-table .col-4 {width:5%;}
+.target-month-search-table .col-5 {width:5%;}
+.target-month-search-table .col-6 {width:5%;}
+.target-month-search-table .col-7 {width:5%;}
+.target-month-search-table .col-8 {width:5%;}
+.target-month-search-table .col-9 {width:5%;}
+.target-month-search-table .col-10 {width:5%;}
+.target-month-search-table .col-11 {width:5%;}
+.target-month-search-table .col-12 {width:5%;}
+.target-month-search-table .col-13 {width:5%;}
+.target-month-search-table .col-14 {width:5%;}
+.target-month-search-table .col-15 {width:5%;}
+.target-month-search-table .col-16 {width:8%;}
+.target-month-search-table .col-17 {width:5%;}
+/* 目标综合查询 */
+.target-search-table .col-1 {width:5%;}
+.target-search-table .col-2 {width:8%;}
+.target-search-table .col-3 {width:15%;}
+.target-search-table .col-4 {width:8%;}
+.target-search-table .col-5 {width:8%;}
+.target-search-table .col-6 {width:36%;}
+.target-search-table .col-7 {width:10%;}
+.target-search-table .col-8 {width:10%;}
+
+
+
+/* 公用 */
+.accident-table-overflow {overflow-y:auto;max-height:397px;overflow-x:hidden;}
+.accident-tab-with-border {border:1px solid #ddd;}
+.accident-inner-ibox {margin-bottom:0;}
+.accident-inner-ibox .ibox-content {padding-bottom:0;}
+.accident-table .cell-wrap {word-break:break-all;word-wrap:break-word;}
+.ml20 {margin-left:20px;}
+.accident-form-required {color:#f00;margin-right:3px;}
+.accident-form-info {text-align:right;margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid #ccc;}
+.accident-form-info dt,
+.accident-form-info dd {display:inline-block;*display:inline;*zoom:1;vertical-align:top;}
+.accident-form-info dt {margin-left:10px;}
+.accident-form-info dd {color:#999;}
+
+
+/* 过滤 */
+.accident-filter-input {width:130px!important;}
+.accident-filter-select {width:100px!important;}
+
+/* 事故上报表格 */
+.accident-reporting-table .col-1 {width:5%;}
+.accident-reporting-table .col-2 {width:15%}
+.accident-reporting-table .col-3 {width:8%;}
+.accident-reporting-table .col-4 {width:10%;}
+.accident-reporting-table .col-5 {width:10%;}
+.accident-reporting-table .col-6 {width:10%;}
+.accident-reporting-table .col-7 {width:8%;}
+.accident-reporting-table .col-8 {width:8%;}
+.accident-reporting-table .col-9 {width:8%;}
+.accident-reporting-table .col-10 {width:18%;text-align:center;}
+.accident-reporting-form .form-control-inline {width:120px!important;}
+.accident-reporting-form .form-full-group .col-xs-3 {width:20%;}
+.accident-reporting-form .form-full-group .col-xs-9 {width:80%;}
+
+/* 事故上报新增弹窗表格 */
+.accident-modal-form .row:last-child {margin-bottom:0;}
+.accident-full-group .col-xs-3 {width:20%;}
+.accident-full-group .col-xs-9 {width:80%;}
+.accident-spe-group .form-item {margin-right:20px;display:inline-block;*display:inline;*zoom:1;vertical-align:top;}
+.accident-spe-group .form-control {display:inline-block;margin-right:5px;width:100px!important;}
+.accident-info-panel {text-align:center;}
+.accident-info-panel .form-item {display:inline-block;*display:inline;*zoom:1;vertical-align:top;margin-right:10px;}
+.accident-info-panel .form-item:last-child {margin-right:0;}
+.accident-info-panel .form-control {display:inline-block;}
+.accident-info-panel .col-1 .form-control {width:100px!important;}
+.accident-info-panel .col-2 .form-control {width:150px!important;}
+.accident-info-panel .col-3 .form-control {width:120px!important;}
+.accident-info-panel .col-4 .form-control {width:130px!important;}
+
+
+/* 事故调查过滤表格 */
+.accident-inve-filter-table {margin-bottom:0;}
+.accident-inve-filter-table .col-1 {width:40%;}
+.accident-inve-filter-table .col-2 {width:23%;}
+.accident-inve-filter-table .col-3 {width:23%;}
+.accident-inve-filter-table .col-4 {width:14%;}
+.accident-inve-filter-table .col-1 input.form-control {width:130px!important;}
+.accident-inve-filter-table .col-1 select.form-control {width:352px!important;}
+.accident-inve-filter-table .col-2 input.form-control,
+.accident-inve-filter-table .col-2 select.form-control,
+.accident-inve-filter-table .col-3 input.form-control,
+.accident-inve-filter-table .col-3 select.form-control {width:150px!important;}
+.accident-inve-filter-table .col-4 {padding-top:58px;}
+.accident-inve-filter-table tbody tr td {border:0 none;}
+
+/* 事故调查表格 */
+.accident-inve-table .col-1 {width:5%;}
+.accident-inve-table .col-2 {width:20%}
+.accident-inve-table .col-3 {width:10%;}
+.accident-inve-table .col-4 {width:10%;}
+.accident-inve-table .col-5 {width:10%;}
+.accident-inve-table .col-6 {width:10%;}
+.accident-inve-table .col-7 {width:10%;}
+.accident-inve-table .col-8 {width:10%;}
+.accident-inve-table .col-9 {width:15%;text-align:center;}
+
+/* 事故调查页面导航 */
+.accident-inve-nav {margin:10px;padding-left:1px;list-style-type:none;overflow:hidden;}
+.accident-inve-nav-item {float:left;}
+.accident-inve-nav-link {display:block;margin-left:-1px;padding:8px 12px;font-size:14px;border:1px solid #ddd;}
+.accident-inve-nav-link:hover,
+.accident-inve-nav-item-current .accident-inve-nav-link,
+.accident-inve-nav-item-current .accident-inve-nav-link:hover{background-color:#02a5d8;color:#fff;}
+
+/* 事故表格 */
+.accident-table-hover td {cursor:pointer;}
+.accident-table-hover tr:hover td {background-color:#ddd;}
+.accident-table-hover tbody .is-selected td,
+.accident-table-hover tbody .is-selected:hover td {cursor:default;background-color:#4ECBF2;color:#fff;}
+
+/* 人员表格 */
+.accident-involved-table .col-1 {width:13%;}
+.accident-involved-table .col-2 {width:10%;}
+.accident-involved-table .col-3 {width:19%;}
+.accident-involved-table .col-4 {width:25%;}
+.accident-involved-table .col-5 {width:33%;}
+
+/* 伤害情况编辑表格 */
+.accident-injury-edit-table .col-1 {width:6%;}
+.accident-injury-edit-table .col-2 {width:15%;}
+.accident-injury-edit-table .col-3 {width:15%;}
+.accident-injury-edit-table .col-4 {width:14%;}
+.accident-injury-edit-table .col-5 {width:14%;}
+.accident-injury-edit-table .col-6 {width:22%;}
+.accident-injury-edit-table .col-7 {width:14%;}
+
+/* 治疗情况 */
+.accident-treatmentt-date .form-control {width:100px!important;}
+.accident-treatmentt-date .form-item {display:inline-block;*display:inline;*zoom:1;vertical-align:top;}
+
+/* 设备表格 */
+.accident-equipment-table .col-1 {width:15%;}
+.accident-equipment-table .col-2 {width:25%;}
+.accident-equipment-table .col-3 {width:30%;}
+.accident-equipment-table .col-4 {width:30%;}
+
+/* 视频交通运输基本信息 */
+.accident-tran-full-group .col-xs-3 {width:20%;}
+.accident-tran-full-group .col-xs-9 {width:80%;}
+
+/* 驾驶员信息表格 */
+.accident-driver-table .col-1 {width:6%;}
+.accident-driver-table .col-2 {width:10%;}
+.accident-driver-table .col-3 {width:14%;}
+.accident-driver-table .col-4 {width:10%;}
+.accident-driver-table .col-5 {width:15%;}
+.accident-driver-table .col-6 {width:15%;}
+.accident-driver-table .col-7 {width:15%;}
+.accident-driver-table .col-8 {width:15%;}
+.accident-driver-small-table .col-1 {width:8%;}
+.accident-driver-small-table .col-2 {width:10%;}
+.accident-driver-small-table .col-3 {width:13%;}
+.accident-driver-small-table .col-4 {width:13%;}
+.accident-driver-small-table .col-5 {width:13%;}
+.accident-driver-small-table .col-6 {width:18%;}
+.accident-driver-small-table .col-7 {width:12%;}
+.accident-driver-small-table .col-8 {width:13%;}
+
+/* 乘客信息表格 */
+.accident-passenger-table .col-1 {width:6%;}
+.accident-passenger-table .col-2 {width:14%;}
+.accident-passenger-table .col-3 {width:20%;}
+.accident-passenger-table .col-4 {width:20%;}
+.accident-passenger-table .col-5 {width:20%;}
+.accident-passenger-table .col-6 {width:20%;}
+.accident-passenger-small-table .col-1 {width:7%;}
+.accident-passenger-small-table .col-2 {width:14%;}
+.accident-passenger-small-table .col-3 {width:19%;}
+.accident-passenger-small-table .col-4 {width:20%;}
+.accident-passenger-small-table .col-5 {width:20%;}
+.accident-passenger-small-table .col-6 {width:20%;}
+
+/* 货物信息表格 */
+.accident-cargo-table .col-1 {width:6%;}
+.accident-cargo-table .col-2 {width:24%;}
+.accident-cargo-table .col-3 {width:30%;}
+.accident-cargo-table .col-4 {width:20%;}
+.accident-cargo-table .col-5 {width:20%;}
+
+/* 环境污染表格 */
+.accident-envi-table .col-1 {width:15%;}
+.accident-envi-table .col-2 {width:30%;}
+.accident-envi-table .col-3 {width:55%;}
+
+/* 生产经营损失表格 */
+.accident-business-table .col-1 {width:15%;}
+.accident-business-table .col-2 {width:45%;}
+.accident-business-table .col-3 {width:40%;}
+
+/* 生产经营损失评估表格 */
+.accident-estimates-table .col-1 {width:10%;}
+.accident-estimates-table .col-2 {width:20%;}
+.accident-estimates-table .col-3 {width:20%;}
+.accident-estimates-table .col-4 {width:15%;}
+.accident-estimates-table .col-5 {width:15%;}
+.accident-estimates-table .col-6 {width:20%;}
+
+/* 调查组成员表格 */
+.accident-inspector-table .col-1 {width:6%:}
+.accident-inspector-table .col-2 {width:10%;}
+.accident-inspector-table .col-3 {width:20%;}
+.accident-inspector-table .col-4 {width:8%;}
+.accident-inspector-table .col-5 {width:8%;}
+.accident-inspector-table .col-6 {width:8%;}
+.accident-inspector-table .col-7 {width:15%;}
+.accident-inspector-table .col-8 {width:15%;}
+.accident-inspector-table .col-9 {width:10%;}
+
+/* 事故调查表格 */
+.accident-survey-table .col-1 {width:5%;}
+.accident-survey-table .col-2 {width:70%;}
+.accident-survey-table .col-3 {width:10%;}
+.accident-survey-table .col-4 {width:15%;}
+
+/* 处理意见表格 */
+.accident-opinion-table .col-1 {width:5%;}
+.accident-opinion-table .col-2 {width:15%;}
+.accident-opinion-table .col-3 {width:15%;}
+.accident-opinion-table .col-4 {width:15%;}
+.accident-opinion-table .col-5 {width:15%;}
+.accident-opinion-table .col-6 {width:15%;}
+.accident-opinion-table .col-7 {width:15%;}
+.accident-opinion-table .col-8 {width:5%;}
+
+/* 事故整改表格 */
+.accident-rect-table .col-1 {width:6%;}
+.accident-rect-table .col-2 {width:14%;}
+.accident-rect-table .col-3 {width:10%;}
+.accident-rect-table .col-4 {width:10%;}
+.accident-rect-table .col-5 {width:10%;}
+.accident-rect-table .col-6 {width:10%;}
+.accident-rect-table .col-7 {width:8%;}
+.accident-rect-table .col-8 {width:8%;}
+.accident-rect-table .col-9 {width:10%;}
+.accident-rect-table .col-10 {width:14%;}
+
+/* 通用统计搜索 */
+.accident-cost-search .form-control {margin-right:10px;width:180px!important;}
+
+/* 费用统计表格 */
+.accident-cost-table .col-1 {width:10%;}
+.accident-cost-table .col-2 {width:30%;}
+.accident-cost-table .col-3 {width:60%;}
+
+/* 费用明细表格 */
+.accident-cost-detail-table .col-1 {width:8%;}
+.accident-cost-detail-table .col-2 {width:15%;}
+.accident-cost-detail-table .col-3 {width:20%;}
+.accident-cost-detail-table .col-4 {width:17%;}
+.accident-cost-detail-table .col-5 {width:18%;}
+.accident-cost-detail-table .col-6 {width:22%;}
+
+/* 详细信息选项卡 */
+.accident-tab {position:relative;z-index:1;}
+.accident-tab-nav {position:absolute;top:0;left:0;z-index:2;padding-left:0;padding-top:1px;width:145px;list-style:none;}
+.accident-tab-nav-link {display:block;margin-top:-1px;padding-top:15px;padding-bottom:15px;text-align: center;border:1px solid #fff;border-right:none;border-top-left-radius: 6px;border-bottom-left-radius: 6px;background-color:#fff;}
+.accident-tab-nav .active{}
+.accident-tab-nav .active  .accident-tab-nav-link {position:relative;z-index:2;padding-left:1px;margin-right:-1px;border-color:#ccc;}
+.accident-tab-nav .active,
+.accident-tab-nav .active .btn {cursor:default;}
+.accident-tab-nav .active .btn {background-color:#1ab394;color:#fff;border-color:#1ab394;}
+.accident-tab-pane {display:none;position:relative;z-index:1;margin-left:145px;padding:15px;min-height:391px;border:1px solid #ccc;border-top-right-radius:6px;border-bottom-right-radius:6px;}
+.full-container {margin-left: 0;border-top: none;border-radius: 0;}
+.accident-tab-pane.active {display:block;} 
+
+/* 横板详细信息选项卡 */
+.accident-tab.row-tab {position:relative;z-index:1;}
+.accident-tab.row-tab .accident-tab-nav-item {float:left}
+.accident-tab.row-tab .accident-tab-nav {position:unset;width:unset;z-index:2;padding-left:0;padding-top:1px;overflow:hidden;list-style:none;margin-bottom:-1px}
+.accident-tab.row-tab .accident-tab-nav-link {    
+	border-bottom-left-radius:0;
+	display: block;
+    margin-top: -1px;
+    padding:10px 5px 0 5px;
+    text-align: center;
+    border: none;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    background-color: transparent!important;}
+.accident-tab.row-tab .accident-tab-nav-link .btn {color:#333;font-size:12px;width:unset; border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.accident-tab.row-tab .accident-tab-nav .active  .accident-tab-nav-link {position:relative;z-index:2;padding-left:5px;margin-right:0px;border-color:#ccc;background-color: #fff!important;border: 1px solid #cccccc;border-bottom: none;}
+.accident-tab.row-tab .accident-tab-nav .active,
+.accident-tab.row-tab .accident-tab-nav .active .btn {cursor:default;}
+.accident-tab.row-tab .accident-tab-nav .active .btn {background-color:#1ab394;color:#fff;border-color:#1ab394;width:unset;}
+.accident-tab.row-tab .accident-tab-pane {margin-left:unset;display:none;position:relative;z-index:1;padding:15px;min-height:391px;border:1px solid #ccc;border-top-right-radius:6px;border-bottom-right-radius:6px;}
+.accident-tab.row-tab .full-container {margin-left: 0;border-top: none;border-radius: 0;}
+.accident-tab.row-tab .accident-tab-pane.active {display:block;}
+
+/* 详细信息表单 */
+.accident-detail-form:last-child {margin-bottom:0;}
+.accident-detail-form .form-full-group .col-xs-2 {width:15.66666667%;}
+.accident-detail-form .form-full-group .col-xs-10 {width:84.33333333%}
+.accident-detail-form .form-control-mete {display:inline-block;margin-right:3px;margin-left:3px;width:50px!important;}
+.accident-detail-form .date-wrapper {position:absolute;top:0;left:0;width:180px;}
+.accident-detail-form .date-wrapper .form-item {display:inline-block;vertical-align:top;}
+.accident-detail-form .date-wrapper .form-control {padding-right:3px;padding-left:3px;width:80px!important;}
+
+/* 调查汇总报告 */
+.sp-wrapper {margin-right:auto;margin-left:auto;padding-top:10px;padding-bottom:10px;width:960px;}
+.sp-title {margin-top:30px;margin-bottom:10px;text-align:center;}
+.sp-info {margin-bottom:10px;}
+.sp-date {float:right;text-decoration:underline;}
+.sp-wrapper .row {margin-bottom:10px;}
+.sp-label,
+.sp-input {height:32px;line-height:32px;font-size:13px;}
+.sp-item {position:relative;padding-left:130px;}
+.sp-label {position:absolute;top:0;left:0;width:120px;text-align:right;}
+.sp-input {border-bottom:1px solid #ccc;}
+.sp-page {margin-bottom:0;font-size:12px;border-bottom:1px solid #eee;}
+.sp-unit{position: absolute;right: 0;top: 0;line-height: 32px;}
+
+/* 目录索引 */
+.accident-index-panel {float:left;width:100%;}
+.accident-index-content {margin-bottom:20px;}
+.accident-index-content:last-child {margin-bottom:0;}
+
+/* 目录索引表格 */
+.accident-index-table {width:100%;}
+.accident-index-table td {padding:10px;border-bottom:1px dotted #ccc;}
+.accident-index-table tr>td:last-child {text-align:right;}
+.accident-survey-index {padding-left:0;list-style:none;}
+.accident-survey-index-item {position:relative;margin-bottom: 10px;padding-right:10px;padding-left:10px;}
+.accident-survey-index-item:after {position:absolute;top:50%;left:10px;right:10px;z-index:1;height:0;font-size:0;overflow:hidden;border-bottom:1px dotted #ccc;content:" ";}
+.accident-survey-index-link,
+.accident-survey-index-title {position:relative;z-index:2;background-color:#fff;}
+.accident-survey-index-link {float:right;padding-left:5px;}
+.accident-survey-index-title {display:inline-block;padding-right:5px;}
+.accident-index-row {margin-top:20px;}
+.accident-index-row .col-1 {float:left;padding-left:15px;padding-right:15px;width:57%;}
+.accident-index-row .col-2 {float:left;padding-right:15px;width:43%;}
+.accident-index-placeholder {width:100%;border:1px solid #ddd;min-height:645px;}
+
+/* 异常管理 */
+.ycgl-title{
+    padding: 5px;
+    background: #eee;
+}
+.ycgl-title .fll{line-height: 30px;}
+
+/*tab页按钮设置*/
+.tabactions {
+	position: fixed;
+	bottom: 0;
+	text-align: right;
+	width: 100%;
+	/* margin: 0 -15px; */
+	padding: 5px 0px;
+	z-index: 110;
+	border-top: 1px solid #e5e5e5;
+	background-color: #F8F8F8;
+}
+
+.tabactions .btn {
+	padding: 6px 20px;
+	/* margin-right: 10px; */
+}
+
+.tabactions .btn-close {
+	margin-right: 10px;
+}
+.tabactions {
+	position: fixed;
+	bottom: 0;
+	text-align: center;
+	width: 100%;
+	padding: 5px 0px;
+	z-index: 110;
+	border-top: 1px solid #e5e5e5;
+	background-color: #F8F8F8;
+}
+
+/*astronergy*/
+.edit_label {
+	font-weight:normal;
+	float: left;
+	margin-top: 8px;
+}
+
+.image_border {
+	border:1px solid #e5e6e7;
+	margin-left:1px;
+}
+
+/*状态图*/
+.detail-step{
+    margin: 30px 0;
+    text-align: center;
+    font-size: 0;
+}
+.detail-step > .item{
+    display: inline-block;
+    position: relative;
+    height: 30px;
+    padding: 50px 0;
+    width: 120px;
+    color: #999;
+    font-size: 14px;
+}
+.detail-step > .item > span{display: block;}
+
+.top-item{
+	top: -46px;
+}
+.bottom-item{
+	left: -596px;
+    top: 45px;
+    width: 180px!important;
+}
+
+.detail-step .point{
+    position: relative;
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+    background: url(../images/detail-step-staus.png) no-repeat 0px -40px;
+    color: #fff;
+    font-size: 16px;
+    line-height: 40px;
+    text-align: center;
+    z-index: 10;
+}
+.detail-step .text,
+.detail-step .line{
+    position: absolute;
+    left: 0;right: 0;
+    line-height: 18px;
+    overflow: hidden;
+}
+.detail-step .line{
+    top: 67px;
+    height: 4px;
+    background: #eee;
+}
+.detail-step .nline{
+	top: 49px;
+    height: 6px;
+    position: absolute;
+    width: 120px;
+    background: url(../images/node_line.png) -153px -196px no-repeat;
+}
+.detail-step .longline{
+	height: 6px;
+    position: absolute;
+    width: 180px;
+    background: url(../images/node_line.png) 0px -212px no-repeat;
+}
+
+.detail-step .rtline{
+	top: 104px;
+    height: 44px;
+    left: 0px;
+    position: absolute;
+    width: 50px;
+    background: url(../images/node_line.png) -134px -98px no-repeat;
+}
+.detail-step .rbline{
+	top: 166px;
+    left: -116px;
+    height: 35px;
+    position: absolute;
+    width: 50px;
+    background: url(../images/node_line.png) -128px -160px no-repeat;
+}
+.detail-step > .active1 .nline {
+    background: url(../images/node_line.png) -107px -203px no-repeat;
+    z-index: 1;
+}
+.detail-step > .active1 .line2 {
+    background: url(../images/node_line.png) -329px 0px;
+    z-index: 1;
+}
+.detail-step > .active1 .longline {
+        background: url(../images/node_line.png) 0px -203px no-repeat;
+    z-index: 1;
+}
+.detail-step > .active1 .rtline {
+    background: url(../images/node_line.png) -37px -98px no-repeat;
+    z-index: 1;
+}
+.detail-step > .active1 .rbline {
+        background: url(../images/node_line.png) -37px -160px no-repeat;
+    z-index: 1;
+}
+.detail-step .first .nline {
+    left: 50%;
+    width: 70px;
+}
+
+.detail-step .line2{
+	top: 4px;
+    position: absolute;
+    height: 96px;
+    width: 164px;
+    background: url(../images/node_line.png) -165px 0;
+}
+.detail-step > .active .line2{
+    background: url(../images/node_line.png);
+}
+.detail-step .text{
+    top: 89px;
+    height: 54px;
+}
+
+.detail-step .text font{
+    display: block;
+    position: absolute;
+    left: 0;right: 0;bottom: 0;
+    font-size: 12px;
+    color: #aaa;
+}
+.detail-step .even .text{
+    top: auto;
+    bottom: 85px;
+    padding-top: 36px;
+    height: 18px;
+}
+.detail-step .even .text font{
+    bottom: auto;top: 0;
+}
+.detail-step .first .line{left: 50%;}
+.detail-step .last .line{right: 50%;}
+
+.detail-step > .active .line{background: #3fda1a;}
+.detail-step > .active .point{background-position: 0px -80px;}
+.detail-step > .active .text{color: #3fda1a;}
+
+.detail-step > .active1 .line{background: #3fda1a;}
+.detail-step > .active1 .point{background-position: 0px 0px;}
+.detail-step > .active1 .text{color: #3fda1a;}
